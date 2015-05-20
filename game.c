@@ -1,3 +1,5 @@
+/* This is the main entrance of the program. */
+
 #include <stdio.h>
 #include "socket.h"
 
