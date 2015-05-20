@@ -3,6 +3,7 @@
 
 int main(int argc, char* agrv[]) {
 	/* connect to server */
+	int socket;
 	char* serverName;
 	char* hostName;
 	unsigned short serverPort, hostPort, id;
@@ -13,7 +14,7 @@ int main(int argc, char* agrv[]) {
 	hostPort = atoi(agrv[4]);
 	id = atoi(agrv[5]);
 
-	establishConnection(serverName, serverPort);
+	socket = establishConnection(serverName, serverPort);
 	
 	return 0;
 }
