@@ -18,6 +18,8 @@ struct Card
 	}*/
 };
 
+bool operator <(const Card &rx1, const Card &rx2);
+
 struct Card7 //将牌组赋值给card7前必须排序 
 {
 	Card card[7];
@@ -31,6 +33,7 @@ struct Card7 //将牌组赋值给card7前必须排序
 	
 	int get_level(void)
 	{
+		sort(card, card + 7);
 		level = 1; // High card
 		level2 = 0;
 		for (int i = 0;i < 7; i++) level2 = level2 * 13 + card[i].val; 
@@ -134,14 +137,14 @@ struct Card7 //将牌组赋值给card7前必须排序
 	
 };
 
-bool operator <(const Card &rx1, const Card &rx2)
+bool operator <(const Card &rx1, const Card &rx2) 
 {
 	return rx1.val < rx2.val;
  } 
 
 bool operator <(const Card7 &rx1, const Card7 &rx2)
 {
-	return (rx1.level == rx2.level)?(rx1.level < rx2.level):(rx1.level2 < rx2.level2); 
+	return (rx1.level != rx2.level)?(rx1.level < rx2.level):(rx1.level2 < rx2.level2); 
 } 
 
 void sort_card7(Card7 card_array[], int N)
@@ -149,7 +152,19 @@ void sort_card7(Card7 card_array[], int N)
 	sort(card_array, card_array + N);
 }
 
+void Test() //测试函数， 从test.in 文件中读取两组牌并比较其大小
+{
+	FILE * fin = freopen("test.in", "r", stdin); 
+	Card7 c[2];
+	for (int i = 0; i < 2; i++)
+		for (int j = 0; j < 7; j++) scanf("%d %d", &c[i].card[j].color, &c[i].card[j].val);
+	for (int i = 0; i < 2; i++) c[i].get_level();
+	printf("%d  %c %d", c[0].level, c[0] < c[1]? '<':'>', c[1].level);
+	fclose(fin);
+}
+
 int main()
 {
+	Test();
 	return 0;
  } 
