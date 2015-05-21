@@ -20,7 +20,7 @@ struct Card
 
 bool operator <(const Card &rx1, const Card &rx2);
 
-struct Card7 //将牌组赋值给card7前必须排序 
+struct Card7
 {
 	Card card[7];
 	int level; // range: 1 ~ 9 
