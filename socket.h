@@ -4,7 +4,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-int establishConnection(char* serverName, unsigned short portNum) {
+int establishConnection(char* serverName, unsigned short portNum) 
 	int s;
 	struct sockaddr_in sa;
 	struct in_addr server;
@@ -13,16 +13,15 @@ int establishConnection(char* serverName, unsigned short portNum) {
 
 	sa.sin_family = AF_INET;
 	sa.sin_port = htons(portNum);
-	sa.sin_addr = server;
+	sa.sin_addr = server
 
 	s = socket(AF_INET, SOCK_STREAM, 0);
 	connect(s, (struct sockaddr*) &sa, sizeof(struct sockaddr_in));
 	return s;
 }
+// ssize_t read (int s, void *buf, int len);
 
-// int read (int s, void *buf, int len);
-
-// int write(int s, void *buf, int len);
+// ssize_t write(int s, void *buf, int len);
 
 void disconnect(int s) {
 	close(s);
