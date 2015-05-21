@@ -19,6 +19,7 @@ int establishConnection(char* serverName, unsigned short portNum)
 	connect(s, (struct sockaddr*) &sa, sizeof(struct sockaddr_in));
 	return s;
 }
+
 // ssize_t read (int s, void *buf, int len);
 
 // ssize_t write(int s, void *buf, int len);
