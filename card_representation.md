@@ -5,9 +5,9 @@ Two character: (num)(suit)
 A K Q J T 9 8 7 6 5 4 3 2
 
 ##Suit representation
-S for Spades
+S for Spades<\n>
 C for Clubs
-H for Hearts
+H for Heart
 D for Diamonds
 
 ##Examples
