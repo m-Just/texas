@@ -4,7 +4,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
-int establishConnection(char* serverName, unsigned short portNum) 
+int establishConnection(char* serverName, unsigned short portNum) {
 	int s;
 	struct sockaddr_in sa;
 	struct in_addr server;
