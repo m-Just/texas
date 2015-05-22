@@ -2,6 +2,11 @@
 #include "socket.h"
 #include <stdlib.h>
 
+#define CHECK 1
+#define CALL  2
+#define RAISE 3
+#define ALLIN 4
+#define FOLD  5
 
 void get_word(char **msg, int fd)
 {
@@ -36,11 +41,11 @@ int change_to_num(char *msg, int *number)// return -1: not number    return 0: i
 void action(int x, int num, int fd)//1:check  2:call  3:raise num  4:all_in  5:fold
 {
     char action_msg[25] = {0};
-    if(x == 1){
+    if(x == CHECK){
         strcpy(action_msg, "check \n");
-    }else if(x == 2){
+    }else if(x == CALL){
         strcpy(action_msg, "call \n");
-    }else if(x == 3){
+    }else if(x == RAISE){
         char num1[10] = {0};
         while(num > 0){
             int ret = num%10;
@@ -51,9 +56,9 @@ void action(int x, int num, int fd)//1:check  2:call  3:raise num  4:all_in  5:f
         strcpy(action_msg, "raise ");
         strcat(action_msg, num1);
         strcat(action_msg, " \n");
-    }else if(x == 4){
+    }else if(x == ALLIN){
         strcpy(action_msg, "all_in \n");
-    }else if(x == 5){
+    }else if(x == FOLD){
         strcpy(action_msg, "fold \n");
     }
     write(fd, action_msg, sizeof(action_msg));
