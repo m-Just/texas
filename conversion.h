@@ -1,3 +1,6 @@
+#ifndef CONVERSION
+#define CONVERSION
+
 #include <stdio.h>
 
 /* convert server language into local language(int) */
@@ -7,7 +10,7 @@ int ctoi(char* color, char* point) {      // char* requires the header of the st
 		switch ((int)point[0]) {
 			case 65: p = 1;  break;
 			case 74: p = 11; break;
-			case 81: p = 12; break;
+		case 81: p = 12; break;
 			case 75: p = 13; break;
 		}
 	} else 	p = atoi(point);
@@ -29,3 +32,5 @@ int colorof(int n) {
 int pointof(int n) {
 	return n / 4 + 1;
 }
+
+#endif
