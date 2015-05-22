@@ -1,6 +1,7 @@
-/* 
- * This file defines all constants in common use.
- */
+/* This file defines all constant in common use */
+
+#ifndef CONSTANT_H
+#define CONSTANT_H
 
 /* Actions */
 #define CHECK 1
@@ -20,3 +21,5 @@
 #define FULL_HOUSE 7
 #define FOUR_OF_A_KIND 8
 #define STRAIGHT_FLUSH 9
+
+#endif
