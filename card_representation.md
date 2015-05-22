@@ -1,3 +1,7 @@
+#IMPORTANT
+This is only for internal representation.  
+For representation in communication with the server, please view the "程序通讯协议"
+
 ##Formation
 Two character: (num)(suit)
 
