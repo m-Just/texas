@@ -1,11 +1,10 @@
-/* This is the main entrance of the program. */
-
 #include <stdio.h>
 #include "socket.h"
+#include "conversion.h"
+#include "opponent.h"
 
 int main(int argc, char* agrv[]) {
 	/* connect to server */
-	int socket;
 	char* serverName;
 	char* hostName;
 	unsigned short serverPort, hostPort, id;
@@ -16,7 +15,13 @@ int main(int argc, char* agrv[]) {
 	hostPort = atoi(agrv[4]);
 	id = atoi(agrv[5]);
 
-	socket = establishConnection(serverName, serverPort);
-	
+	establishConnection(serverName, serverPort);
+
+	/* main round loop */
+	int round;
+	for (round = 0; round < MAX_ROUND; round++) {
+		
+	}
+
 	return 0;
 }
