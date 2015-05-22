@@ -1,13 +1,7 @@
 #include <stdio.h>
 #include "socket.h"
 #include <stdlib.h>
-
-#define CHECK 1
-#define CALL  2
-#define RAISE 3
-#define ALLIN 4
-#define FOLD  5
-#define BLIND 6
+#include "constant.h"
 
 void get_word(char **msg, int fd)
 {
