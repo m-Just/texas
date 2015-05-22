@@ -3,7 +3,7 @@ This is only for internal representation.
 For representation in communication with the server, please view the "程序通讯协议"
 
 ##Formation
-Two character: (num)(suit)
+Two characters: (num)(suit)
 
 ##Num representation
 A K Q J T 9 8 7 6 5 4 3 2
