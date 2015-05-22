@@ -1,5 +1,5 @@
-#ifndef CONVERSION
-#define CONVERSION
+#ifndef CONVERSION_H
+#define CONVERSION_H
 
 #include <stdio.h>
 
