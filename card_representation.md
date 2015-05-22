@@ -3,18 +3,27 @@ This is only for internal representation.
 For representation in communication with the server, please view the "程序通讯协议"
 
 ##Formation
-Two characters: (num)(suit)
+An integer(0~51): n = 4*(point-1)+(color)
 
-##Num representation
-A K Q J T 9 8 7 6 5 4 3 2
+##Point representation
+1 for Ace  
+2 for Two  
+...  
+11 for Jack  
+12 for Queen  
+13 for King
 
-##Suit representation
-S for Spades  
-C for Clubs  
-H for Heart  
-D for Diamonds
+##Color representation
+0 for Hearts  
+1 for Diamonds  
+2 for Spades  
+3 for Clubs
+
+##Properties
+point = n/4 + 1  
+color = n%4
 
 ##Examples
-AC for Ace of Clubs  
-TH for Ten of Hearts  
-2S for Two of Spades
+0 for Ace of Hearts  
+9 for Three of Diamonds  
+51 for King of Clubs  
