@@ -1,4 +1,4 @@
-#Formation
+##Formation
 Two character: (num)(suit)
 
 #Num representation
