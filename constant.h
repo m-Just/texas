@@ -10,6 +10,8 @@
 #define ALLIN 4
 #define FOLD  5
 #define BLIND 6
+#define SHOW  7
+#define QUIT  8
 
 /* Poker Hands */
 #define HIGH_CARD 1
