@@ -22,4 +22,8 @@
 #define FOUR_OF_A_KIND 8
 #define STRAIGHT_FLUSH 9
 
+/* Basic Information */
+#define MAX_PLAYER_NUM 8
+#define MAX_ROUND 500
+
 #endif
