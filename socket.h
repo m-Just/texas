@@ -1,3 +1,6 @@
+#ifndef SOCKET_H
+#define SOCKET_H
+
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -27,3 +30,5 @@ int establishConnection(char* serverName, unsigned short portNum) {
 void disconnect(int s) {
 	close(s);
 }
+
+#endif
