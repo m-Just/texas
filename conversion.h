@@ -10,7 +10,7 @@ int ctoi(char* color, char* point) {      // char* requires the header of the st
 		switch ((int)point[0]) {
 			case 65: p = 1;  break;
 			case 74: p = 11; break;
-		case 81: p = 12; break;
+			case 81: p = 12; break;
 			case 75: p = 13; break;
 		}
 	} else 	p = atoi(point);
