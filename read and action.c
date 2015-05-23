@@ -77,12 +77,24 @@ struct player_in_game
 	int pid, jetton, money, bet, action; //1:check  2:call  3:raise  4:all_in  5:fold  6:blind
 }done[10]; //done[0].pid is the number of players.
 
+struct player_rank
+{
+	int pid;
+	int hold[5];
+	int nut_hand;
+}rank[10];//rank[0].pid is player number.
+
+struct pot_win
+{
+	int pid, num;
+}win[10];//win[0].pid is player number.
+
 int hold[5], com[10];
 
 int plnum = 0; //player number
 int pot = 0;
 
-int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:
+int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:common cards  7:showdown  8:pot-win  9:notify
 {
 	char *msg;
 	get_word(&msg, fd);
@@ -136,6 +148,7 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:
 	if(strcmp(msg, "hold/") == 0){
 		char *col;
 		char *poi;
+		hold[0] = 0;
 		while(1){
 			get_word(&msg, fd);
 			if(strcmp(msg, "/hold") == 0)return 4;
@@ -148,10 +161,98 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:
 		}	
 	}
 	if(strcmp(msg, "inquire/") == 0){
+		done[0].pid = 0;
 		while(1){
 			int num = 0;
 			get_word(&msg, fd);
 			if(strcmp(msg, "/inquire") == 0)return 5;
+			else if(strcmp(msg, "total") == 0){
+				get_word(&msg, fd); get_word(&msg, fd);
+				change_to_num(msg, &num);
+				pot = num;
+			}else{
+				done[0].pid++;
+				int x = done[0].pid;
+				change_to_num(msg, &num); done[x].pid = num;
+				get_word(&msg, fd); change_to_num(msg, &num); done[x].jetton = num;
+				get_word(&msg, fd); change_to_num(msg, &num); done[x].money = num;
+				get_word(&msg, fd); change_to_num(msg, &num); done[x].bet = num;
+				get_word(&msg, fd);
+				if(strcmp(msg, "ckeck") == 0)done[x].action = 1;
+				if(strcmp(msg, "call") == 0)done[x].action = 2;
+				if(strcmp(msg, "raise") == 0)done[x].action = 3;
+				if(strcmp(msg, "all_in") == 0)done[x].action = 4;
+				if(strcmp(msg, "fold") == 0)done[x].action = 5;
+				if(strcmp(msg, "blind") == 0)done[x].action = 6;
+			}
+		}
+	}
+	if(strcmp(msg, "flop/") == 0 || strcmp(msg, "turn/") == 0 || strcmp(msg, "river/") == 0){
+		char *col;
+		char *poi;
+		com[0] = 0;
+		while(1){
+			get_word(&msg, fd);
+			if(strcmp(msg, "/flop") == 0 || strcmp(msg, "/turn") == 0 || strcmp(msg, "/river") == 0)return 6;
+			else{
+				strcpy(col, msg);
+				get_word(&msg, fd); strcpy(poi, msg);
+				com[0]++;
+				com[com[0]] = ctoi(col, poi);
+			}
+		}
+	}
+	if(strcmp(msg, "showdown/") == 0){
+		while(strcmp(msg, "/common") != 0)get_word(&msg, fd);
+		rank[0].pid = 0;
+		while(1){
+			get_word(&msg, fd);
+			if(strcmp(msg, "/showdown") == 0)return 7;
+			else{
+				int num, x;
+				rank[0].pid++; x = rank[0].pid;
+				get_word(&msg, fd); change_to_num(msg, &num); rank[x].pid = num;
+				int i;
+				for(i = 1; i <= 2; i++){
+					char *col;
+					char *poi; 
+					get_word(&msg, fd); strcpy(col, msg);
+					get_word(&msg, fd); strcpy(poi, msg);
+					rank[x].hold[i] = ctoi(col, poi);
+				}
+				get_word(&msg, fd);
+				if(strcmp(msg, "HIGH_CARD") == 0)rank[x].nut_hand = 1;
+				if(strcmp(msg, "ONE_PAIR") == 0)rank[x].nut_hand = 2;
+				if(strcmp(msg, "TWO_PAIR") == 0)rank[x].nut_hand = 3;
+				if(strcmp(msg, "THREE_OF_A_KIND") == 0)rank[x].nut_hand = 4;
+				if(strcmp(msg, "STRAIGHT") == 0)rank[x].nut_hand = 5;
+				if(strcmp(msg, "FLUSH") == 0)rank[x].nut_hand = 6;
+				if(strcmp(msg, "FULL_HOUSE") == 0)rank[x].nut_hand = 7;
+				if(strcmp(msg, "FOUR_OF_A_KIND") == 0)rank[x].nut_hand = 8;
+				if(strcmp(msg, "STRAIGHT_FLUSH") == 0)rank[x].nut_hand = 9;
+			}
+		}
+	}
+	if(strcmp(msg, "pot-win/") == 0){
+		win[0].pid = 0;
+		while(1){
+			get_word(&msg, fd);
+			if(strcmp(msg, "/pot-win") == 0)return 8;
+			else{
+				int num, x;
+				win[0].pid++;
+				x = win[0].pid;
+				change_to_num(msg, &num); win[x].pid = num;
+				get_word(&msg, fd); change_to_num(msg, &num); win[x].num = num;
+			}
+		}
+	}
+	if(strcmp(msg, "notify/") == 0){
+		done[0].pid = 0;
+		while(1){
+			int num = 0;
+			get_word(&msg, fd);
+			if(strcmp(msg, "/notify") == 0)return 9;
 			else if(strcmp(msg, "total") == 0){
 				get_word(&msg, fd); get_word(&msg, fd);
 				change_to_num(msg, &num);
