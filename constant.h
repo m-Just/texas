@@ -26,6 +26,6 @@
 
 /* Basic Information */
 #define MAX_PLAYER_NUM 8
-#define MAX_ROUND 500
+#define MAX_ROUND 500   // needs to be updated
 
 #endif
