@@ -10,8 +10,9 @@
 #define ALLIN 4
 #define FOLD  5
 #define BLIND 6  // big and small blind bet.
-#define SHOW  7  // showdown, including winning and losing, except folding.
-#define QUIT  8  // gameover, when a player loses all his money.
+#define SHOW  7  // showdown, including both winning and losing occasion.
+#define POT   8  // the action of winning jetton from the pot.
+#define QUIT  9  // gameover, when a player loses all his money.
 
 /* Poker Hands */
 #define HIGH_CARD 1
