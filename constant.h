@@ -9,9 +9,9 @@
 #define RAISE 3
 #define ALLIN 4
 #define FOLD  5
-#define BLIND 6
-#define SHOW  7
-#define QUIT  8
+#define BLIND 6  // big and small blind bet.
+#define SHOW  7  // showdown, including winning and losing, except folding.
+#define QUIT  8  // gameover, when a player loses all his money.
 
 /* Poker Hands */
 #define HIGH_CARD 1
@@ -26,6 +26,6 @@
 
 /* Basic Information */
 #define MAX_PLAYER_NUM 8
-#define MAX_ROUND 500   // needs to be updated
+#define MAX_ROUND 500  // needs to be updated
 
 #endif
