@@ -8,7 +8,7 @@
 #include <arpa/inet.h>
 
 int establishConnection(char* serverName, unsigned short portNum) {
-	int s;
+	int s, connected = 0;
 	struct sockaddr_in sa;
 	struct in_addr server;
 	
@@ -16,11 +16,19 @@ int establishConnection(char* serverName, unsigned short portNum) {
 
 	sa.sin_family = AF_INET;
 	sa.sin_port = htons(portNum);
-	sa.sin_addr = server
+	sa.sin_addr = server;
 
 	s = socket(AF_INET, SOCK_STREAM, 0);
-	connect(s, (struct sockaddr*) &sa, sizeof(struct sockaddr_in));
-	return s;
+
+	int i;
+	for (i = 1; i <= 5; i++) {
+		if (!connect(s, (struct sockaddr*) &sa, sizeof(struct sockaddr_in))) {
+			connected = 1; break;
+		} else  printf("Connection failure. Reconnecting...\n");
+	}
+
+	if (connected) return s;
+	else	       return -1;
 }
 
 // ssize_t read (int s, void *buf, int len);
