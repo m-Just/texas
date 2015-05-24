@@ -17,7 +17,7 @@ int main(int argc, char* agrv[]) {
 	id = atoi(agrv[5]);
 
 	fd = establishConnection(serverName, serverPort);
-	if (fd) printf("Connection established.\n");
+	if (fd != -1) printf("Connection established.\n");
 	else {  printf("Connection failure. Program Abort.\n"); return 1;}
 
 	/* main round loop */
