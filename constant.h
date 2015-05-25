@@ -14,6 +14,17 @@
 #define POT   8  // the action of winning jetton from the pot.
 #define QUIT  9  // gameover, when a player loses all his money.
 
+/* Get Msg */
+#define SEAT_MSG 1
+#define GAME_OVER_MSG 2
+#define BLIND_MSG 3
+#define HOLD_MSG 4
+#define INQUIRE_MSG 5
+#define COM_CARDS_MSG 6
+#define SHOW_MSG 7
+#define POT_MSG 8
+#define NOTIFY_MSG 9
+
 /* Poker Hands */
 #define HIGH_CARD 1
 #define ONE_PAIR  2
