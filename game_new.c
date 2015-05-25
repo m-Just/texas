@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <algorithm>
 #include "socket.h"
 #include "constant.h"
 #include "conversion.h"
