@@ -39,6 +39,10 @@ int hash(int id) {
 	return i;
 }
 
+void iterate_c(double* value, double change, int roundNum) {
+	*value = (*value * roundNum + change) / (double)(roundNum+1);
+}
+
 // update after every inquire, notify(if available), showdown and pot-win message
 // for the representation and detailed definition of the actions, please view "constant.h"
 int updateData(int id, int action, int num, int jet, int m, int roundNum) { // num is only available for CALL, RAISE, BLIND, SHOW and POT actions.
@@ -62,18 +66,13 @@ int updateData(int id, int action, int num, int jet, int m, int roundNum) { // n
 	opp[i].maxbet[0] < opp[i].bet[roundNum] ? opp[i].bet[roundNum] : opp[i].maxbet[0];
 
 	if (action == FOLD || action == SHOW) {  // the errors of the values below are big when roundNum is small
-		iterate(&opp[i].arvgBet,  (double)opp[i].bet[roundNum], roundNum);
-		iterate(&opp[i].variance, pow(opp[i].bet[roundNum]-opp[i].avrgBet, 2), roundNum);
-		iterate(&opp[i].foldrate, (double)action%SHOW/FOLD, roundNum);
+		iterate_c(&opp[i].avrgBet,  (double)opp[i].bet[roundNum], roundNum);
+		iterate_c(&opp[i].variance, pow(opp[i].bet[roundNum]-opp[i].avrgBet, 2), roundNum);
+		iterate_c(&opp[i].foldrate, (double)(action%SHOW)/FOLD, roundNum);
 	}
 	
 	// check if the estimate() is right. if not, re-analyse and considering bluff-playing.
 }
-
-void iterate(double* value, double change, int roundNum) {
-	*value = (*value * roundNum + change) / (double)(roundNum+1);
-}
-
 
 int styleAnalyse(int id) {
 	int i = hash(id);
