@@ -9,21 +9,10 @@
 #define RAISE 3
 #define ALLIN 4
 #define FOLD  5
-#define BLIND 6  // big and small blind bet.
-#define SHOW  7  // showdown, including both winning and losing occasion.
+#define BLIND 6  // both big and small blind bet.
+#define SHOW  7  // showdown, including both winning and losing occasions.
 #define POT   8  // the action of winning jetton from the pot.
 #define QUIT  9  // gameover, when a player loses all his money.
-
-/* Get Msg */
-#define SEAT_MSG 1
-#define GAME_OVER_MSG 2
-#define BLIND_MSG 3
-#define HOLD_MSG 4
-#define INQUIRE_MSG 5
-#define COM_CARDS_MSG 6
-#define SHOW_MSG 7
-#define POT_MSG 8
-#define NOTIFY_MSG 9
 
 /* Poker Hands */
 #define HIGH_CARD 1
@@ -36,8 +25,30 @@
 #define FOUR_OF_A_KIND 8
 #define STRAIGHT_FLUSH 9
 
-/* Basic Information */
+/* Get Msg */
+#define SEAT_MSG 1
+#define GAME_OVER_MSG 2
+#define BLIND_MSG 3
+#define HOLD_MSG 4
+#define INQUIRE_MSG 5
+#define COM_CARDS_MSG 6
+#define SHOW_MSG 7
+#define POT_MSG 8
+#define NOTIFY_MSG 9
+
+/* Game Stage */
+#define PREFLOP 1
+#define FLOP    2
+#define TURN    3
+#define RIVER   4
+#define POT_WIN 5
+
+/* Basic Information */  // updated 5.25
 #define MAX_PLAYER_NUM 8
-#define MAX_ROUND 500  // needs to be updated
+#define MAX_ROUND 600
+#define START_MONEY  4000
+#define START_JETTON 2000
+#define BIG_BLIND   40
+#define SMALL_BLIND 20
 
 #endif
