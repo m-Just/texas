@@ -19,10 +19,10 @@ int establishConnection(char* serverName, unsigned short serverPort, char* hostN
 
 	sa.sin_family = AF_INET;
 	sa.sin_port = htons(serverPort);
-	sa.sin_addr = server;
+	sa.sin_addr.s_addr = server;
 	sh.sin_family = AF_INET;
 	sh.sin_port = htons(hostPort);
-	sh.sin_addr = host;
+	sh.sin_addr.s_addr = host;
 
 	s = socket(AF_INET, SOCK_STREAM, 0);
 	bind(s, (struct sockaddr*) &sh, sizeof(struct sockaddr_in));
