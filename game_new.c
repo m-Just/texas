@@ -113,7 +113,7 @@ void reg(int num, int fd)
 struct player
 {
 	int pid, jetton, money;
-}button, sblind, bblind, nor[10];//nor[0].pid is the number of other players.
+}button, sblind, bblind, nor[10], my;//nor[0].pid is the number of other players.
 //nor: other players.
 
 struct player_in_game
@@ -320,7 +320,26 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 	}
 }
 
-
+int get_uplim(double winrate, int jet)
+{
+	int tmp = pot, f = 0;
+	int i;
+	for(i = 1; i <= done[0].pid; i++){
+		if(f == 1){
+			int x = hash(done[i].pid);
+			if(opp[x].maxbet[0])tmp += opp[x].maxbet[0];
+			else tmp += 30;
+		}
+		if(done[i].pid == sblind.pid)f = 1;
+	}
+	double para = 1.0;
+	if((double)jet/START_JETTON < 1.0)para = (double)jet/START_JETTON;
+	int ans = ((double)tmp * winrate * para) / (1.0 - winrate * para) + 0.5;
+	return ans;
+	//(tmp + n) * winrate * jet/START_JETTON = n
+	//tmp*r*para = - n*r*para + n
+	//tmp*r*para / (1 - r*para) = n
+}
 
 int main(int argc, char* agrv[]) {
 	/* connect to server */
@@ -341,10 +360,17 @@ int main(int argc, char* agrv[]) {
 	else {  printf("Connection failure. Program Abort.\n"); return 1;}
 
 	reg(id, fd);
+	
+	my.pid = id;
+	my.jetton = START_JETTON;
+	my.money = START_MONEY;
 
 	/* main round loop */
-	int round, flag = 0;
+	int round, flag = 0, mybet = 0;
 	for (round = 0; round < MAX_ROUND; round++) {
+		mybet = 0;
+		hold[0] = 0;
+		com[0] = 0;
 		while(1){
 			//read
 			int x = get_msg(fd);
@@ -356,11 +382,30 @@ int main(int argc, char* agrv[]) {
 			}
 			
 			//pre action
+			if(x == SEAT_MSG){
+				memset(opp, 0, sizeof(opp));
+				int i = 1;
+				opp[i].pid = botton.pid;
+				i++;
+				opp[i].pid = sblind.pid;
+				i++;
+				if(plnum > 2)opp[i].pid = bblind.pid, i++;
+				int j;
+				for(j = 1; j <= nor[0].pid; j++){
+					opp[i].pid = nor[j].pid;
+					i++;
+				}
+			}
 			if(x == INQUIRE_MSG || x == NOTIFY_MSG){
 				int i;
 				int stage = 1;
 				if(com[0] > 0)stage += com[0] - 2;
 				for(i = 1; i <= done[0].pid; i++){
+					if(done[i].pid == my.pid){
+						my.jetton = done[i].jetton;
+						my.money = done[i].money;
+						mybet = done[i].bet;
+					}
 					int bet = 0;
 					if(done[i].action == CHECK || done[i].action == ALLIN || done[i].action == FOLD);
 					else bet = done[i].bet;
@@ -384,7 +429,30 @@ int main(int argc, char* agrv[]) {
 			}
 			
 			//action
-			
+			if(x == INQUIRE_MSG){
+				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
+				if(done[1].bet > mybet)needcall = 1;
+				int stage = 1;
+				if(com[0] > 0)stage += com[0] - 2;
+				double winrate;
+				if(stage == 1){//before flop
+					if(hold[0] == 0)winrate = 1.0/(double)plnum;
+					else{
+						Card pubc[6], handc[3];
+						change_to_Card(pubc, handc);
+					 	winrate = win_rate(handc, pubc, com[0], plnum);	
+					}
+					uplim = get_uplim(winrate, my.jetton);
+					if(needcall == 0)action(CHECK, 0, fd);
+					else{
+						if(done[1].bet > uplim)action(FOLD, 0, fd);
+						else action(CALL, 0, fd);
+					}
+				}
+				if(stage == 1){
+					
+				}
+			}
 			
 		}
 	}
