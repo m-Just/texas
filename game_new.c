@@ -100,6 +100,8 @@ void reg(int num, int fd)
     strcpy(msg, "reg: ");
     strcat(msg, num1);
     strcat(msg, " hudebudeliao need_notify \n");
+    write(fd, msg, sizeof(msg));
+
    // reg: pid pname need_notify eol
 }
 
@@ -333,6 +335,7 @@ int main(int argc, char* agrv[]) {
 	hostPort = atoi(agrv[4]);
 	id = atoi(agrv[5]);
 
+	printf("%s\n%d\n%s\n%d\n",serverName, serverPort, hostName, hostPort);
 	fd = establishConnection(serverName, serverPort, hostName, hostPort);
 	if (fd != -1) printf("Connection established.\n");
 	else {  printf("Connection failure. Program Abort.\n"); return 1;}
@@ -363,6 +366,9 @@ int main(int argc, char* agrv[]) {
 					else bet = done[i].bet;
 					updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage, round);
 				}
+				//for test
+				action(FOLD, 0, fd);
+				//test over
 			}
 			if(x == SHOW_MSG){
 				int i;
@@ -373,7 +379,7 @@ int main(int argc, char* agrv[]) {
 			if(x == POT_MSG){
 				int i;
 				for(i = 1; i <= win[0].pid; i++){
-					updateData(win[i].pid, POT, num, -1, -1, POT_WIN, round);
+					updateData(win[i].pid, POT, /*num*//*for test*/0, -1, -1, POT_WIN, round);
 				}
 			}
 			
