@@ -162,7 +162,7 @@ int estHand(int id, int* card, int cardNum, int stage, int roundNum) { // estima
 		} else return UNKNOWN;
 	} else
 	if (opp[i].currentAction == ALLIN) {
-		if (opp[i].style == BLUFF) return potentHand-(poteneHand != HIGH_CARD);
+		if (opp[i].style == BLUFF) return potentHand-(potentHand != HIGH_CARD);
 		else 			   return potentHand+(potentHand != STRAIGHT_FLUSH);
 	} else return UNKNOWN;
 	
