@@ -86,6 +86,22 @@ void action(int x, int num, int fd)//1:check  2:call  3:raise num  4:all_in  5:f
     write(fd, action_msg, sizeof(action_msg));
 }
 
+void reg(int num, int fd)
+{
+	char msg[50] = {0};
+	char num1[10] = {0};
+    while(num > 0){
+        int ret = num%10;
+        char tmp[2] = {0}; tmp[0] = ret + 48;
+        strcat(num1, tmp);
+        num /= 10;    
+    }
+    strrev(num1);
+    strcpy(msg, "reg: ");
+    strcat(msg, num1);
+    strcat(msg, " hudebudeliao need_notify \n");
+   // reg: pid pname need_notify eol
+}
 
 	//action(kind, bet number, socket);
 	//get_word(&a_word_name, socket);
@@ -321,15 +337,48 @@ int main(int argc, char* agrv[]) {
 	if (fd != -1) printf("Connection established.\n");
 	else {  printf("Connection failure. Program Abort.\n"); return 1;}
 
+	reg(id, fd);
+
 	/* main round loop */
 	int round, flag = 0;
 	for (round = 0; round < MAX_ROUND; round++) {
 		while(1){
+			//read
 			int x = get_msg(fd);
+			
+			//quit
 			if(x == GAME_OVER_MSG){
 				disconnect(fd);
 				return 0;
 			}
+			
+			//pre action
+			if(x == INQUIRE_MSG || x == NOTIFY_MSG){
+				int i;
+				int stage = 1;
+				if(com[0] > 0)stage += com[0] - 2;
+				for(i = 1; i <= done[0].pid; i++){
+					int bet = 0;
+					if(done[i].action == CHECK || done[i].action == ALLIN || done[i].action == FOLD);
+					else bet = done[i].bet;
+					updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage, round);
+				}
+			}
+			if(x == SHOW_MSG){
+				int i;
+				for(i = 1; i <= rank[0].pid; i++){
+					updateData(rank[i].pid, SHOW, rank[i].nut_hand, -1, -1, POT_WIN, round);
+				}
+			}
+			if(x == POT_MSG){
+				int i;
+				for(i = 1; i <= win[0].pid; i++){
+					updateData(win[i].pid, POT, num, -1, -1, POT_WIN, round);
+				}
+			}
+			
+			//action
+			
 			
 		}
 	}
