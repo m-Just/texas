@@ -155,7 +155,7 @@ int estHand(int id, int* card, int cardNum, int stage, int roundNum) { // estima
 	if (opp[i].currentAction == RAISE || opp[i].currentAction == CALL) {
 		if (opp[i].maxbet[potentHand]) {
 			if (opp[i].bet[roundNum][stage-1] > jettonPara(id, stage, roundNum)*(highestHand-potentHand+1)*opp[i].maxbet[potentHand] ||
-			   (opp[i].maxbet[highestHand] &&
+			   (opp[i].maxbet[highestHand-1] &&
 			    opp[i].bet[roundNum][stage-1] > jettonPara(id, stage, roundNum)*opp[i].maxbet[highestHand-1])) {
 				return highestHand;
 			} else  return potentHand;
@@ -172,7 +172,7 @@ int estHand(int id, int* card, int cardNum, int stage, int roundNum) { // estima
 int estFold(int id, int* card, int cardNum, int stage, int roundNum) { // return the estimated amount of bet that would force the opponent's to fold
 	int eHand = estHand(id, card, cardNum, stage, roundNum); 
 	if (stage > PREFLOP && eHand > UNKNOWN)
-		return round(jettonPara(id, stage, roundNum)*maxbet(eHand));
+		return round(jettonPara(id, stage, roundNum)*opp[hash(id)].maxbet[eHand]);
 	else 	return 0;  // return 0 for unavailability
 }
 
