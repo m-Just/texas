@@ -30,6 +30,11 @@ struct {           // database structure, for the analysis of the opponents
 } opp[MAX_PLAYER_NUM];
 
 
+int rnd(double val)
+{
+	return (int)(val + 0.5);
+}
+
 /* Analysis */
 int hash(int id) {
 	int i = 0;
@@ -172,7 +177,7 @@ int estHand(int id, int* card, int cardNum, int stage, int roundNum) { // estima
 int estFold(int id, int* card, int cardNum, int stage, int roundNum) { // return the estimated amount of bet that would force the opponent's to fold
 	int eHand = estHand(id, card, cardNum, stage, roundNum); 
 	if (stage > PREFLOP && eHand > UNKNOWN)
-		return round(jettonPara(id, stage, roundNum)*opp[hash(id)].maxbet[eHand]);
+		return rnd(jettonPara(id, stage, roundNum)*opp[hash(id)].maxbet[eHand]);
 	else 	return 0;  // return 0 for unavailability
 }
 
