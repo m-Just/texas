@@ -170,9 +170,10 @@ int estHand(int id, int* card, int cardNum, int stage, int roundNum) { // estima
 
 // note: estimation is not available before the stage of FLOP
 int estFold(int id, int* card, int cardNum, int stage, int roundNum) { // return the estimated amount of bet that would force the opponent's to fold
-	if (stage > PREFLOP)
-		return round(jettonPara(id, stage, roundNum)*maxbet(estHand(id, card, cardNum, stage, roundNum))); // return 0 for unavailability
-	else 	return 0;
+	int eHand = estHand(id, card, cardNum, stage, roundNum); 
+	if (stage > PREFLOP && eHand > UNKNOWN)
+		return round(jettonPara(id, stage, roundNum)*maxbet(eHand));
+	else 	return 0;  // return 0 for unavailability
 }
 
 
