@@ -2,6 +2,7 @@
 #define CONVERSION_H
 
 #include <stdio.h>
+#include "Card.h"
 
 /* convert server language into local language(int) */
 int ctoi(char* color, char* point) {      // char* requires the header of the string
