@@ -204,7 +204,7 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 				get_word(msg, fd); change_to_num(msg, &num); done[x].money = num;
 				get_word(msg, fd); change_to_num(msg, &num); done[x].bet = num;
 				get_word(msg, fd);
-				if(strcmp(msg, "ckeck") == 0)done[x].action = 1;
+				if(strcmp(msg, "check") == 0)done[x].action = 1;
 				if(strcmp(msg, "call") == 0)done[x].action = 2;
 				if(strcmp(msg, "raise") == 0)done[x].action = 3;
 				if(strcmp(msg, "all_in") == 0)done[x].action = 4;
@@ -291,7 +291,7 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 				get_word(msg, fd); change_to_num(msg, &num); done[x].money = num;
 				get_word(msg, fd); change_to_num(msg, &num); done[x].bet = num;
 				get_word(msg, fd);
-				if(strcmp(msg, "ckeck") == 0)done[x].action = 1;
+				if(strcmp(msg, "check") == 0)done[x].action = 1;
 				if(strcmp(msg, "call") == 0)done[x].action = 2;
 				if(strcmp(msg, "raise") == 0)done[x].action = 3;
 				if(strcmp(msg, "all_in") == 0)done[x].action = 4;
