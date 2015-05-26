@@ -317,7 +317,7 @@ int main(int argc, char* agrv[]) {
 	hostPort = atoi(agrv[4]);
 	id = atoi(agrv[5]);
 
-	fd = establishConnection(serverName, serverPort);
+	fd = establishConnection(serverName, serverPort, hostName, hostPort);
 	if (fd != -1) printf("Connection established.\n");
 	else {  printf("Connection failure. Program Abort.\n"); return 1;}
 
