@@ -33,4 +33,18 @@ int pointof(int n) {
 	return n / 4 + 1;
 }
 
+//convert read to win_rate
+void change_to_Card(Card pubc[], Card handc[])
+{
+	int i;
+	for(i = 1; i <= hold[0]; i++){
+		handc[i].color = colorof(hold[i]);
+		handc[i].val = pointof(hold[i]);
+	}
+	for(i = 1; i <= com[0]; i++){
+		pubc[i].color = colorof(com[i]);
+		pubc[i].val = pointof(com[i]);
+	}
+}
+
 #endif
