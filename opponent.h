@@ -52,8 +52,8 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	int i = hash(id); int j;
 	opp[i].currentAction = action;					    
 	opp[i].currentStage  = stage;
-	opp[i].money = m;      /* notice: the value of "m" and "jet" is the last value received from the server */
-	opp[i].jetton = jet;   /* when the action is POT, the change in "m" and "jet" is done by "num" */
+	if(m != -1)   opp[i].money = m;      /* notice: the value of "m" and "jet" is the last value received from the server */
+	if(jet != -1) opp[i].jetton = jet;   /* when the action is POT, the change in "m" and "jet" is done by "num" */
 
 	if 	(action == QUIT || action == CHECK) {/* do nothing */}
 	else if (action == CALL || action == RAISE) opp[i].bet[roundNum][stage-1] = num;
