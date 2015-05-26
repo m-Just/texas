@@ -15,6 +15,7 @@
 #define QUIT  9  // gameover, when a player loses all his money.
 
 /* Poker Hands */
+#define UNKNOWN   0
 #define HIGH_CARD 1
 #define ONE_PAIR  2
 #define TWO_PAIR  3
@@ -37,7 +38,7 @@
 #define NOTIFY_MSG 9
 
 /* Game Stage */
-#define PREFLOP 1
+#define PREFLOP 1 // including blind
 #define FLOP    2
 #define TURN    3
 #define RIVER   4
