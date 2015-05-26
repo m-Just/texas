@@ -230,8 +230,8 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 		}
 	}
 	if(strcmp(msg, "flop/") == 0 || strcmp(msg, "turn/") == 0 || strcmp(msg, "river/") == 0){
-		char *col;
-		char *poi;
+		char col[10];
+		char poi[5];
 		com[0] = 0;
 		while(1){
 			get_word(msg, fd);
@@ -256,8 +256,8 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 				get_word(msg, fd); change_to_num(msg, &num); rank[x].pid = num;
 				int i;
 				for(i = 1; i <= 2; i++){
-					char *col;
-					char *poi; 
+					char col[10];
+					char poi[5];
 					get_word(msg, fd); strcpy(col, msg);
 					get_word(msg, fd); strcpy(poi, msg);
 					rank[x].hold[i] = ctoi(col, poi);
