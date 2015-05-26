@@ -4,20 +4,38 @@
 #include "constant.h"
 #include "conversion.h"
 #include "opponent.h"
+#include<string.h>
+
+
+char * strrev(char *str)
+{
+  char *right = str;
+  char *left = str;
+  char ch;
+  while (*right)   right++;
+  right--;
+  while (left < right)
+  {
+    ch = *left;
+    *left++ = *right;
+    *right-- = ch;
+  }
+  return(str);
+}
 
 
 void get_word(char msg[], int fd)
 {
-    char tmp;
+    char tmp[2];
     int flag = 0;
     msg[0] = 0;
     while(1){
-        read(fd, tmp, sizeof(tmp));
-        if(tmp == ' ' || tmp == '\n'){
+        read(fd, tmp, 1);
+        if(tmp[0] == ' ' || tmp[0] == '\n'){
             if(flag == 1)break;
         }else{
 			char tmp1[2] = {0};
-			tmp1[0] = tmp;
+			tmp1[0] = tmp[0];
 			strcat(msg, tmp1);
 			flag = 1;
 		}
