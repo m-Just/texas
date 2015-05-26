@@ -154,14 +154,16 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 				get_word(msg, fd); change_to_num(msg, &num); button.jetton = num;
 				get_word(msg, fd); change_to_num(msg, &num); button.money = num;	
 				plnum ++;
-			}else if(strcmp(msg, "small blind:") == 0){
+			}else if(strcmp(msg, "small") == 0){
 				int num = 0;
+				get_word(msg, fd);
 				get_word(msg, fd); change_to_num(msg, &num); sblind.pid = num;	
 				get_word(msg, fd); change_to_num(msg, &num); sblind.jetton = num;
 				get_word(msg, fd); change_to_num(msg, &num); sblind.money = num;
 				plnum ++;	
-			}else if(strcmp(msg, "big blind:") == 0){
+			}else if(strcmp(msg, "big") == 0){
 				int num = 0;
+				get_word(msg, fd);
 				get_word(msg, fd); change_to_num(msg, &num); bblind.pid = num;	
 				get_word(msg, fd); change_to_num(msg, &num); bblind.jetton = num;
 				get_word(msg, fd); change_to_num(msg, &num); bblind.money = num;
