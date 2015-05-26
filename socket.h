@@ -19,16 +19,16 @@ int establishConnection(char* serverName, unsigned short serverPort, char* hostN
 
 	sa.sin_family = AF_INET;
 	sa.sin_port = htons(serverPort);
-	sa.sin_addr.s_addr = server;
+	sa.sin_addr = server;
 	sh.sin_family = AF_INET;
 	sh.sin_port = htons(hostPort);
-	sh.sin_addr.s_addr = host;
+	sh.sin_addr = host;
 
 	s = socket(AF_INET, SOCK_STREAM, 0);
 	bind(s, (struct sockaddr*) &sh, sizeof(struct sockaddr_in));
 
 	int i;
-	for (i = 1; i <= 5; i++) {
+	while(1) {
 		if (!connect(s, (struct sockaddr*) &sa, sizeof(struct sockaddr_in))) {
 			connected = 1; break;
 		} else  printf("Connection failure. Reconnecting...\n");
