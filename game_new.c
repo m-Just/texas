@@ -30,7 +30,7 @@ void get_word(char msg[], int fd)
     int flag = 0;
     msg[0] = 0;
     while(1){
-        read(fd, tmp, 1);
+        read(fd, tmp, sizeof(tmp[0]));
         if(tmp[0] == ' ' || tmp[0] == '\n'){
             if(flag == 1)break;
         }else{
