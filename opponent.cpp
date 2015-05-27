@@ -135,7 +135,7 @@ int estHand(int id, int* card, int cardNum, int stage, int roundNum) { // estima
 	else if (pmax == 3) { lowestHand = THREE_OF_A_KIND; potentHand = FULL_HOUSE;     highestHand = FOUR_OF_A_KIND; }
 	else if (pmax == 4) { lowestHand = FOUR_OF_A_KIND;  potentHand = FOUR_OF_A_KIND; highestHand = FOUR_OF_A_KIND; }
 	if	(smax >= 3) { if (pair != 2 && pmax < 3) potentHand = STRAIGHT; }
-	if 	(cmax >= 3) { potentHand > FLUSH ? potentHand : FLUSH; }
+	if 	(cmax >= 3) { potentHand = potentHand > FLUSH ? potentHand : FLUSH; }
 
 	if (smax >= 3 && cmax >=3) {  // check for STRAIGHT_FLUSH
 		int cnt = 0, p[5] = {0};
