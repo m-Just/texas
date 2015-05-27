@@ -499,8 +499,33 @@ int main(int argc, char* agrv[]) {
 						else action(CALL, 0, fd);
 					}
 				}
-				if(stage == 1){
-					
+				if(stage >= 2){
+					int f = 0;
+					Card pubc[6], handc[3];
+					change_to_Card(pubc, handc);
+					winrate = win_rate(handc, pubc, com[0], plnum);
+					int hold_poker = //get_level(...);  present nut hand
+					for(i = 1; i <= done[0].pid; i++){
+						if(done[i].pid == bblind.pid)f = 1;
+						int tmp = -1;
+						if(f == 0)tmp = estHand(done[i].pid, com, com[0], stage, round);
+						if(f == 1){
+							if(stage > 2)tmp = estHand(done[i].pid, com, com[0], stage - 1, round);
+						}
+						if(tmp != -1 && tmp != 0){
+							winrate *= (1 + (0.1 * (hold_poker - tmp - 1)));
+						}
+					}
+					uplim = get_uplim(winrate, my.jetton);
+					if(uplim > /*sth.*/){
+						action(RAISE, /*snum.*/, fd);
+					}else{
+						if(needcall == 0)action(CHECK, 0, fd);
+						else{
+							if(done[1].bet > uplim)action(FOLD, 0, fd);
+							else action(CALL, 0, fd);
+						}
+					}
 				}
 			}*/
 			
