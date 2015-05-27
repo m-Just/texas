@@ -1,6 +1,6 @@
 #ifndef OPPONENT_H
 #define OPPONENT_H
-#include"constant.h"
+#include "constant.h"
 
 // the styles and patterns may not be needed.
 /* Opponent's Playing Styles */
@@ -41,9 +41,10 @@ int patternAnalyse(int id) ;
 
 double jettonPara(int id, int stage, int roundNum) ;
 
+/* Application */
+// note: estimation is not available before the stage of FLOP
 int estHand(int id, int* card, int cardNum, int stage, int roundNum) ;
 
-// note: estimation is not available before the stage of FLOP
 int estFold(int id, int* card, int cardNum, int stage, int roundNum) ;
 
 
