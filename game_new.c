@@ -327,12 +327,12 @@ int get_uplim(double winrate, int jet)
 	int tmp = pot, f = 0;
 	int i;
 	for(i = 1; i <= done[0].pid; i++){
+		if(done[i].pid == bblind.pid)f = 1;
 		if(f == 1){
 			int x = hash(done[i].pid);
 			if(opp[x].maxbet[0])tmp += opp[x].maxbet[0];
 			else tmp += 30;
 		}
-		if(done[i].pid == sblind.pid)f = 1;
 	}
 	double para = 1.0;
 	if((double)jet/START_JETTON < 1.0)para = (double)jet/START_JETTON;
@@ -400,7 +400,7 @@ int main(int argc, char* agrv[]) {
 			}
 			if(x == INQUIRE_MSG || x == NOTIFY_MSG){
 				int i;
-				int stage = 1;
+				int stage = 1, f = 0;
 				if(com[0] > 0)stage += com[0] - 2;
 				for(i = 1; i <= done[0].pid; i++){
 					if(done[i].pid == my.pid){
@@ -408,10 +408,20 @@ int main(int argc, char* agrv[]) {
 						my.money = done[i].money;
 						mybet = done[i].bet;
 					}
-					int bet = 0;
-					if(done[i].action == CHECK || done[i].action == ALLIN || done[i].action == FOLD);
-					else bet = done[i].bet;
-					updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage, round);
+					if(done[i].pid == bblind.pid)f = 1;
+					if(f == 0){
+						int bet = 0;
+						if(done[i].action == CHECK || done[i].action == ALLIN || done[i].action == FOLD);
+						else bet = done[i].bet;
+						updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage, round);
+					}
+					if(f == 1){
+						int bet = 0;
+						if(done[i].action == CHECK || done[i].action == ALLIN || done[i].action == FOLD);
+						else bet = done[i].bet;
+						if(stage > 1)updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage - 1, round);
+						else updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage, round);
+					}
 				}
 				//for test
 				action(FOLD, 0, fd);
