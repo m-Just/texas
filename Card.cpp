@@ -1,20 +1,38 @@
-#include<cstdlib>
+#include<stdlib.h>
 #include<algorithm> 
 #include"Card.h"
+#include<string.h>
+#include<stdio.h>
+#include"constant.h"
 using namespace std;
 
 Card int2card(int card_in_int)
 {
 	Card res;
-	res.val = card_in_int / 4 + 1;
+	res.val = card_in_int / 4;
+	if (res.val == 0) res.val += 13;
 	res.color = card_in_int % 4 + 1;
 	return res;
 }
 
-int Card7::get_level(void)
-	{
+char* Card2str(const Card &card)
+{
+	static char str[30];
+	str[0] = '(';
+	switch (card.color) {
+	case 1: str[1] = 'H'; break;
+	case 2: str[1] = 'D'; break;
+	case 3: str[1] = 'S'; break;
+	case 4: str[1] = 'C'; break;
+	}
+	sprintf(str + 2, ",%d) \0", card.val);
+	//sprintf(str + 2, "00\0");
+	return str;
+}
 
-#ifdef TEST
+int Card7::get_level(void){
+#ifdef _TEST
+		printf("/******************\n");
 		printf("calculating the level of Card7:\n");
 		for (int i = 0; i < 7; i++) printf("(%d, %d) ", card[i].color, card[i].val);
 		printf("\n");
@@ -118,9 +136,12 @@ int Card7::get_level(void)
 			}
 		}
 		
-#ifdef TEST
-		printf("level:%d %d", level1, level2);
+#ifdef _TEST
+		printf("level:%d %d", level, level2);
+		printf("******************/\n");
 #endif
+		if (level < 1 || level > 9) printf("card7 level calculation error, level = %d\n", level);
+		if (level2 < 0) printf("card7 level2 calculation error, level2 = %d\n", level2);
 		return level;
 	}
 
@@ -137,5 +158,12 @@ bool operator <(const Card7 &rx1, const Card7 &rx2)
 void sort_card7(Card7 card_array[], int N)
 {
 	sort(card_array, card_array + N);
+}
+
+void print_Card(Card card[], int num, char *card_type)
+{
+	printf("/**%d of %s:\n", num, card_type);
+	for (int i = 0; i < num; i++) printf("%s", Card2str(card[i]));
+	printf("\n**\n");
 }
 
