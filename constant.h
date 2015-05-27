@@ -52,4 +52,7 @@
 #define BIG_BLIND   40
 #define SMALL_BLIND 20
 
+#define TEST
+#define TESTNEW
+#define WRITE_IN_FILE
 #endif

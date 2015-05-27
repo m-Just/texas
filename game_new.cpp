@@ -1,4 +1,3 @@
-#define TEST
 int hold[5], com[10];
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,7 +37,13 @@ void get_word(char msg[], int fd)
     int flag = 0;
     msg[0] = 0;
     while(1){
-        while(read(fd, tmp, sizeof(tmp[0])) == 0) printf("0");
+		while (read(fd, tmp, sizeof(tmp[0])) == 0)
+		{
+			usleep(1000 * 5);
+			printf("Nothing in socket for read!\n");
+		}
+			;
+#endif
         if(tmp[0] == ' ' || tmp[0] == '\n'){
             if(flag == 1){
 #ifdef TEST
@@ -361,9 +366,13 @@ int main(int argc, char* agrv[]) {
 	char* hostName;
 	unsigned short serverPort, hostPort, id;
 
-#ifdef TEST
+#ifdef WRITE_IN_FILE
 	FILE * fout = freopen("melog.txt", "w", stdout);
+#endif
+
+#ifdef TEST
 	printf("%d\n",time(0));
+	Card hand_card[2], common_card[7];
 #endif
 	
 	serverName = agrv[1];
@@ -372,7 +381,6 @@ int main(int argc, char* agrv[]) {
 	hostPort = atoi(agrv[4]);
 	id = atoi(agrv[5]);
 
-	printf("%s\n%d\n%s\n%d\n",serverName, serverPort, hostName, hostPort);
 	fd = establishConnection(serverName, serverPort, hostName, hostPort);
 	if (fd != -1) printf("Connection established.\n");
 	else {  printf("Connection failure. Program Abort.\n"); return 1;}
@@ -399,6 +407,20 @@ int main(int argc, char* agrv[]) {
 				return 0;
 			}
 			
+#ifdef TEST
+			if (x == COM_CARDS_MSG && com[0] >= 3)
+			{
+				for (int i = 0; i < hold[0]; i++) hand_card[i] = int2card(hold[i + 1]);
+				for (int i = 0; i < com[0]; i++) common_card[i] = int2card(com[i + 1]);
+				rate win_and_draw = win_rate(hand_card, common_card, com[0], plnum);
+				printf("/****************************/\n");
+				printf("player alive:%d\n", plnum);
+				print_Card(hand_card, hold[0], "hand card");
+				print_Card(common_card, com[0], "common card");
+				printf("\nwin_rate: %lf, draw_rate: %lf\n", win_and_draw.second, win_and_draw.first);
+				printf("/****************************/\n");
+			}
+#endif			
 			//pre action
 			if(x == SEAT_MSG){
 				memset(opp, 0, sizeof(opp));
@@ -439,9 +461,9 @@ int main(int argc, char* agrv[]) {
 						else updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage, round);
 					}
 				}
-				//for test
-				action(FOLD, 0, fd);
-				//test over
+#ifdef TEST
+				action(FOLD, 0, fd); 
+#endif
 			}
 			if(x == SHOW_MSG){
 				int i;
@@ -485,7 +507,7 @@ int main(int argc, char* agrv[]) {
 		}
 	}
 
-#ifdef TEST
+#ifdef WRITE_IN_FILE
 	fclose(fout);
 #endif
 	return 0;
