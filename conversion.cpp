@@ -1,15 +1,15 @@
-#include"conversion.h"
-#include"Card.h"
-#include<stdlib.h>
+#include "conversion.h"
+#include "Card.h"
+#include <stdlib.h>
 
 int ctoi(char* color, char* point) {      // char* requires the header of the string
 	int c, p;
 	if (point[0] > 64) {
 		switch ((int)point[0]) {
-			case 65: p = 1;  break;
-			case 74: p = 11; break;
-			case 81: p = 12; break;
-			case 75: p = 13; break;
+			case 'A': p = 1;  break;
+			case 'J': p = 11; break;
+			case 'Q': p = 12; break;
+			case 'K': p = 13; break;
 		}
 	} else 	p = atoi(point);
 

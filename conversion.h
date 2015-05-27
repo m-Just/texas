@@ -5,7 +5,6 @@
 /* convert server language into local language(int) */
 int ctoi(char* color, char* point) ;    // char* requires the header of the string
 
-
 int colorof(int n) ;
 
 int pointof(int n) ;

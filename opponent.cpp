@@ -1,4 +1,3 @@
-
 #include"opponent.h"
 #include <stdio.h>
 #include <math.h>
@@ -9,8 +8,7 @@
 
 ANAOPP opp[MAX_PLAYER_NUM];
 
-int rnd(double val)
-{
+int rnd(double val) {
 	return (int)(val + 0.5);
 }
 
