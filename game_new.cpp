@@ -1,11 +1,19 @@
+int hold[5], com[10];
 #include <stdio.h>
 #include <stdlib.h>
 #include "socket.h"
 #include "constant.h"
 #include "conversion.h"
 #include "opponent.h"
+#include "Card.h"
 #include<string.h>
+#define TEST
+#ifdef TEST
+#include <time.h>
+#endif
 
+
+extern ANAOPP opp[MAX_PLAYER_NUM];
 
 char * strrev(char *str)
 {
@@ -30,11 +38,16 @@ void get_word(char msg[], int fd)
     int flag = 0;
     msg[0] = 0;
     while(1){
-        read(fd, tmp, sizeof(tmp[0]));
+        while(read(fd, tmp, sizeof(tmp[0])) == 0) printf("0");
         if(tmp[0] == ' ' || tmp[0] == '\n'){
-            if(flag == 1)break;
+            if(flag == 1){
+#ifdef TEST
+			printf("%s\n",msg);	
+#endif
+			break;
+	    }
         }else{
-			char tmp1[2] = {0};
+			char tmp1[2] = {0, 0};
 			tmp1[0] = tmp[0];
 			strcat(msg, tmp1);
 			flag = 1;
@@ -132,8 +145,6 @@ struct pot_win
 {
 	int pid, num;
 }win[10];//win[0].pid is player number.
-
-int hold[5], com[10];
 
 int plnum = 0; //player number
 int pot = 0;
@@ -349,6 +360,11 @@ int main(int argc, char* agrv[]) {
 	char* serverName;
 	char* hostName;
 	unsigned short serverPort, hostPort, id;
+
+#ifdef TEST
+	FILE * fout = freopen("melog.txt", "w", stdout);
+	printf("%d\n",time(0));
+#endif
 	
 	serverName = agrv[1];
 	serverPort = atoi(agrv[2]);
@@ -362,7 +378,7 @@ int main(int argc, char* agrv[]) {
 	else {  printf("Connection failure. Program Abort.\n"); return 1;}
 
 	reg(id, fd);
-	
+
 	my.pid = id;
 	my.jetton = START_JETTON;
 	my.money = START_MONEY;
@@ -387,7 +403,7 @@ int main(int argc, char* agrv[]) {
 			if(x == SEAT_MSG){
 				memset(opp, 0, sizeof(opp));
 				int i = 1;
-				opp[i].pid = botton.pid;
+				opp[i].pid = button.pid;
 				i++;
 				opp[i].pid = sblind.pid;
 				i++;
@@ -441,8 +457,8 @@ int main(int argc, char* agrv[]) {
 					if(hold[0] == 0)winrate = 1.0/(double)plnum;
 					else{
 						Card pubc[6], handc[3];
-						change_to_Card(pubc, handc);
-					 	winrate = win_rate(handc, pubc, com[0], plnum);	
+						change_to_Card(pubc, handc, hold, com);
+					 	winrate = win_rate(handc, pubc, com[0], plnum).second;	
 					}
 					uplim = get_uplim(winrate, my.jetton);
 					if(needcall == 0)action(CHECK, 0, fd);
@@ -459,5 +475,8 @@ int main(int argc, char* agrv[]) {
 		}
 	}
 
+#ifdef TEST
+	fclose(fout);
+#endif
 	return 0;
 }
