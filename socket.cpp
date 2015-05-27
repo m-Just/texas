@@ -1,4 +1,4 @@
-#include"socket.h"
+#include "socket.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 int establishConnection(char* serverName, unsigned short serverPort, char* hostName, unsigned short hostPort) {
-	int s, connected = 0;
+	int s, connected = 0, opt;
 	struct sockaddr_in sa;
 	struct sockaddr_in sh;
 	struct in_addr server;
@@ -24,6 +24,7 @@ int establishConnection(char* serverName, unsigned short serverPort, char* hostN
 	sh.sin_addr = host;
 
 	s = socket(AF_INET, SOCK_STREAM, 0);
+	setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 	bind(s, (struct sockaddr*) &sh, sizeof(struct sockaddr_in));
 
 	int i;
