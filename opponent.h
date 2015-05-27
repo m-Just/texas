@@ -20,8 +20,8 @@
 struct ANAOPP{           // database structure, for the analysis of the opponents
 	int pid, style;
 	int bet[MAX_ROUND][5], hand[MAX_ROUND], pattern[MAX_ROUND];
-	int maxbet[10]; // nine different poker hands. [0] for overall.
-	int currentAction, currentStage, money, jetton;
+	int maxbet[10], maxbetRound[10]; // nine different poker hands. [0] for overall.
+	int currentAction, currentStage, money[MAX_ROUND+1], jetton[MAX_ROUND+1];
 	double avrgBet, variance, foldrate; // these values will be useful only after gathering enough info
 };
 
@@ -29,23 +29,25 @@ struct ANAOPP{           // database structure, for the analysis of the opponent
 int rnd(double val);
 
 /* Analysis */
-int hash(int id) ;
+int hash(int id);
 
-void iterate(double* value, double change, int roundNum) ;
+void iterate(double* value, double change, int roundNum);
 
-int updateData(int id, int action, int num, int jet, int m, int stage, int roundNum) ;
+double coco(void* x, void* y, int stepsize);
 
-int styleAnalyse(int id) ;
+int updateData(int id, int action, int num, int jet, int m, int stage, int roundNum);
 
-int patternAnalyse(int id) ;
+int styleAnalyse(int id);
 
-double jettonPara(int id, int stage, int roundNum) ;
+int patternAnalyse(int id);
+
+double jettonPara(int id, int stage, int roundNum, int maxbetRound);
 
 /* Application */
 // note: estimation is not available before the stage of FLOP
-int estHand(int id, int* card, int cardNum, int stage, int roundNum) ;
+int estHand(int id, int* card, int cardNum, int stage, int roundNum);
 
-int estFold(int id, int* card, int cardNum, int stage, int roundNum) ;
+int estFold(int id, int* card, int cardNum, int stage, int roundNum);
 
 
 #endif
