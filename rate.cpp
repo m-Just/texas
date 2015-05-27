@@ -32,7 +32,7 @@ rate dfs(bool flag[][14], const Card hand_card[], Card public_card[], const int 
 			{
 				c7.card[5] = int2card(i);
 				c7.card[6] = int2card(j);
-				if (flag[c7.card[5].color][c7.card[5].val] || flag[c7.card[6].color][c7.card[61].val]) continue;
+				if (flag[c7.card[5].color][c7.card[5].val] || flag[c7.card[6].color][c7.card[6].val]) continue;
 				c7_in_order[cnt++] = c7;
 				c7_in_order[cnt - 1].get_level();
 			}

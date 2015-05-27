@@ -1,3 +1,4 @@
+#define TEST
 int hold[5], com[10];
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,11 +8,10 @@ int hold[5], com[10];
 #include "opponent.h"
 #include "Card.h"
 #include<string.h>
-#define TEST
+
 #ifdef TEST
 #include <time.h>
 #endif
-
 
 extern ANAOPP opp[MAX_PLAYER_NUM];
 
@@ -42,7 +42,7 @@ void get_word(char msg[], int fd)
         if(tmp[0] == ' ' || tmp[0] == '\n'){
             if(flag == 1){
 #ifdef TEST
-			printf("%s\n",msg);	
+			//printf("%s\n",msg);	
 #endif
 			break;
 	    }
@@ -447,7 +447,7 @@ int main(int argc, char* agrv[]) {
 			}
 			
 			//action
-			if(x == INQUIRE_MSG){
+			/* if(x == INQUIRE_MSG){
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
 				if(done[1].bet > mybet)needcall = 1;
 				int stage = 1;
@@ -470,7 +470,7 @@ int main(int argc, char* agrv[]) {
 				if(stage == 1){
 					
 				}
-			}
+			}*/
 			
 		}
 	}

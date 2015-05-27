@@ -3,9 +3,23 @@
 #include"Card.h"
 using namespace std;
 
+Card int2card(int card_in_int)
+{
+	Card res;
+	res.val = card_in_int / 4 + 1;
+	res.color = card_in_int % 4 + 1;
+	return res;
+}
+
 int Card7::get_level(void)
 	{
-		sort(card, card + 7);
+
+#ifdef TEST
+		printf("calculating the level of Card7:\n");
+		for (int i = 0; i < 7; i++) printf("(%d, %d) ", card[i].color, card[i].val);
+		printf("\n");
+#endif
+		sort(card, card + 6);
 		level = 1; // High card
 		level2 = 0;
 		for (int i = 0;i < 7; i++) level2 = level2 * 13 + card[i].val; 
@@ -104,6 +118,9 @@ int Card7::get_level(void)
 			}
 		}
 		
+#ifdef TEST
+		printf("level:%d %d", level1, level2);
+#endif
 		return level;
 	}
 
@@ -121,3 +138,4 @@ void sort_card7(Card7 card_array[], int N)
 {
 	sort(card_array, card_array + N);
 }
+
