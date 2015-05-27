@@ -407,7 +407,7 @@ int main(int argc, char* agrv[]) {
 				return 0;
 			}
 			
-#ifdef TEST
+#ifdef TEST_RATE
 			if (x == COM_CARDS_MSG && com[0] >= 3)
 			{
 				for (int i = 0; i < hold[0]; i++) hand_card[i] = int2card(hold[i + 1]);

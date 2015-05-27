@@ -15,6 +15,11 @@ Card int2card(int card_in_int)
 	return res;
 }
 
+int Card2int(Card card)
+{
+	return (card.val % 13 * 4 + card.color - 1);
+}
+
 char* Card2str(const Card &card)
 {
 	static char str[30];

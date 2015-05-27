@@ -35,6 +35,7 @@ void sort_card7(Card7 card_array[], int N);
 
 Card int2card(int card_in_int);
 char * Card2str(const Card &card);
+int Card2int(Card); 
 
 struct rate
 {
