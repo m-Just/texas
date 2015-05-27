@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdio.h>
+#include<time.h>
 
 int establishConnection(char* serverName, unsigned short serverPort, char* hostName, unsigned short hostPort) {
 	int s, connected = 0, opt;
@@ -32,6 +33,7 @@ int establishConnection(char* serverName, unsigned short serverPort, char* hostN
 		if (!connect(s, (struct sockaddr*) &sa, sizeof(struct sockaddr_in))) {
 			connected = 1; break;
 		} else  printf("Connection failure. Reconnecting...\n");
+		usleep(100 * 1000); 
 	}
 
 	if (connected) return s;
