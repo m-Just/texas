@@ -12,9 +12,9 @@ int rnd(double val) {
 }
 
 /* Analysis */
-int hash(int id) { // error corrected
-	int i;
-	for (i = 0; i < MAX_PLAYER_NUM && opp[i].pid != 0; i++) if (opp[i].pid == id) break;
+int hash(int id) {
+	int i = 0;
+	while (i < MAX_PLAYER_NUM && opp[i++].pid != 0) if (opp[i].pid == id) break;
 	opp[i].pid = id;
 	return i;
 }
@@ -67,13 +67,14 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	opp[i].currentAction = action;					    
 	opp[i].currentStage  = stage;
 	if (m 	!= -1) opp[i].money[roundNum]  = m;     /* notice: the value of "m" and "jet" is the last value received from the server */
-	if (jet != -1) opp[i].jetton[roundNum] = jet;   
+	if (jet != -1) opp[i].jetton[roundNum] = jet;
+	int* b = &opp[i].bet[roundNum][stage-1];
 
-	if 	(action == QUIT || action == CHECK) {/* do nothing */}
-	else if (action == CALL || action == RAISE) opp[i].bet[roundNum][stage-1] = num;
-	else if (action == ALLIN) opp[i].bet[roundNum][stage-1] = num;
-	else if (action == FOLD)  opp[i].hand[roundNum] = NA;	
-	else if (action == BLIND) opp[i].bet[roundNum][stage-1] = num;
+	if 	(action == QUIT || action == CHECK) *b = num;
+	else if (action == CALL || action == RAISE) *b = num;
+	else if (action == ALLIN) *b = num;
+	else if (action == FOLD)  { *b = num; opp[i].hand[roundNum] = NA; }
+	else if (action == BLIND) *b = num;
 	else if (action == SHOW) {
 		opp[i].hand[roundNum] = num%10; // num := best_hand*10+nut_hand
 		/* bluff detection */
@@ -94,13 +95,13 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	}
 	else printf("Error: Invalid action#%d by player#%d at round#%d!\n", action, id, roundNum+1);
 	
-	opp[i].maxbet[0] = opp[i].maxbet[0] < opp[i].bet[roundNum][stage-1] ? opp[i].bet[roundNum][stage-1] : opp[i].maxbet[0];
+	opp[i].maxbet[0] = opp[i].maxbet[0] < *b ? *b : opp[i].maxbet[0];
 
 	if (action == FOLD || action == SHOW) {  // the errors of the values below are big when roundNum is small
-		opp[i].lastbet[roundNum] = opp[i].bet[roundNum][stage-1];
+		opp[i].lastbet[roundNum] = *b;
 		opp[i].cc = coco(opp[i].lastbet, opp[i].jetton, 0, 20, 10, roundNum);
-		iterate(&opp[i].avrgBet,  (double)opp[i].bet[roundNum][stage-1], roundNum);
-		iterate(&opp[i].variance, pow((double)(opp[i].bet[roundNum][stage-1])-opp[i].avrgBet, 2.0), roundNum);
+		iterate(&opp[i].avrgBet,  (double)*b, roundNum);
+		iterate(&opp[i].variance, pow((double)(*b-opp[i].avrgBet), 2.0), roundNum);
 		iterate(&opp[i].foldrate, (double)(action%SHOW)/FOLD, roundNum);
 	}
 	

@@ -1,6 +1,8 @@
 #ifndef OPPONENT_H
 #define OPPONENT_H
 
+#include "constant.h"
+
 // the styles and patterns may not be needed.
 /* Opponent's Playing Styles */
 #define NA     0
