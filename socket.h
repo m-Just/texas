@@ -21,4 +21,6 @@ void action(int x, int num, int fd);//1:check  2:call  3:raise num  4:all_in  5:
 
 void reg(int num, int fd, char* name_and_notify);
 
+int socket_get_int(int fd);
+
 #endif

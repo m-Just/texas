@@ -12,7 +12,6 @@
 #define BLIND 6  // both big and small blind bet.
 #define SHOW  7  // showdown and pot distribution, including both winning and losing occasions.
 #define QUIT  8  // gameover, when a player loses all his money.
-#define POT SHOW
 
 /* Poker Hands */
 #define UNKNOWN   0
@@ -42,7 +41,6 @@
 #define FLOP    2
 #define TURN    3
 #define RIVER   4 // including pot_win
-#define POT_WIN RIVER
 
 /* Basic Information */  // updated 5.25
 #define MAX_PLAYER_NUM 8
@@ -57,4 +55,8 @@
 #define TESTNEW
 #define WRITE_IN_FILE
 #define max(a, b) ((a) < (b))?(b):(a)
+
+/*Abbr*/
+#define SGI socket_get_int(fd)
+#define IOW get_word(msg, fd) //ignore one word from socket
 #endif

@@ -366,7 +366,7 @@ int main(int argc, char* agrv[]) {
 			if (x == POT_MSG){
 				int i;
 				for (i = 1; i <= win[0].pid; i++){
-					updateData(win[i].pid, POT, win[i].num, -1, -1, POT_WIN, round);
+					//updateData(win[i].pid, POT, win[i].num, -1, -1, POT_WIN, round);
 				}
 				break;
 			}

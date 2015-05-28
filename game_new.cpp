@@ -12,7 +12,7 @@ int hold[5], com[10];
 #include <time.h>
 #endif
 
-extern ANAOPP opp[MAX_PLAYER_NUM];
+extern ANAOPP opp[];
 
 struct player
 {
@@ -51,32 +51,20 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 			get_word(msg, fd);
 			if(strcmp(msg, "/seat") == 0)return 1;
 			if(strcmp(msg, "button:") == 0){
-				int num = 0;
-				get_word(msg, fd); change_to_num(msg, &num); button.pid = num;	
-				get_word(msg, fd); change_to_num(msg, &num); button.jetton = num;
-				get_word(msg, fd); change_to_num(msg, &num); button.money = num;	
+				button.pid = SGI;	button.jetton = SGI;	button.money = SGI;
 				plnum ++;
 			}else if(strcmp(msg, "small") == 0){
-				int num = 0;
-				get_word(msg, fd);
-				get_word(msg, fd); change_to_num(msg, &num); sblind.pid = num;	
-				get_word(msg, fd); change_to_num(msg, &num); sblind.jetton = num;
-				get_word(msg, fd); change_to_num(msg, &num); sblind.money = num;
+				IOW;
+				sblind.pid = SGI;	sblind.jetton = SGI;	sblind.money = SGI;
 				plnum ++;	
 			}else if(strcmp(msg, "big") == 0){
-				int num = 0;
-				get_word(msg, fd);
-				get_word(msg, fd); change_to_num(msg, &num); bblind.pid = num;	
-				get_word(msg, fd); change_to_num(msg, &num); bblind.jetton = num;
-				get_word(msg, fd); change_to_num(msg, &num); bblind.money = num;
+				IOW;
+				bblind.pid = SGI;	bblind.jetton = SGI;	bblind.money = SGI;
 				plnum ++;	
 			}else{
-				int num = 0;
 				nor[0].pid ++;
 				int x = nor[0].pid;
-				change_to_num(msg, &num); nor[x].pid = num;	
-				get_word(msg, fd); change_to_num(msg, &num); nor[x].jetton = num;
-				get_word(msg, fd); change_to_num(msg, &num); nor[x].money = num;	
+				nor[x].pid = SGI;	nor[x].jetton = SGI;	nor[x].money = SGI;	
 				plnum ++;
 			}
 		}	
@@ -84,13 +72,11 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 	if(strcmp(msg, "game-over") == 0)return 2;
 	if(strcmp(msg, "blind/") == 0){
 		int num = 0;
-		get_word(msg, fd); get_word(msg, fd); change_to_num(msg, &num); sblind.jetton -= num;
+		IOW; sblind.jetton -= SGI;
 		while(1){
 			get_word(msg, fd);
 			if(strcmp(msg, "/blind") == 0)return 3;
-			else{
-				get_word(msg, fd); change_to_num(msg, &num); bblind.jetton -= num;
-			}
+			else bblind.jetton -= SGI;
 		}
 	}
 	if(strcmp(msg, "hold/") == 0){
@@ -115,16 +101,13 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 			get_word(msg, fd);
 			if(strcmp(msg, "/inquire") == 0)return 5;
 			else if(strcmp(msg, "total") == 0){
-				get_word(msg, fd); get_word(msg, fd);
-				change_to_num(msg, &num);
-				pot = num;
+				IOW;	
+				pot = SGI;
 			}else{
 				done[0].pid++;
 				int x = done[0].pid;
 				change_to_num(msg, &num); done[x].pid = num;
-				get_word(msg, fd); change_to_num(msg, &num); done[x].jetton = num;
-				get_word(msg, fd); change_to_num(msg, &num); done[x].money = num;
-				get_word(msg, fd); change_to_num(msg, &num); done[x].bet = num;
+				done[x].jetton = SGI;	done[x].money = SGI;	done[x].bet = SGI;
 				get_word(msg, fd);
 				if(strcmp(msg, "check") == 0)done[x].action = 1;
 				if(strcmp(msg, "call") == 0)done[x].action = 2;
