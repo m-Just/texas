@@ -8,7 +8,7 @@
 2. Deletion of stage POT_WIN, which is now combined with RIVER stage.
 
 ###Updates in opponent.cpp
-1. In function *updateData()*, change the usage of *num* at SHOW stage: num = best_hand*10+nut_h.  
+1. In function *updateData()*, change the invocation of *num* at SHOW stage: num = best_hand*10+nut_hand.  
 2. In function *updateData()*, change the usage of *stage*: all stages after RIVER are part of the stage of RIVER.  
 3. In function *updateData()*, improved detection of bluff-playing.  
 4. In function *jettonPara()*, added correction of the correlation coeffecient between opponents bet and jettons left.  
