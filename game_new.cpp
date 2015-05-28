@@ -13,12 +13,15 @@
 
 extern ANAOPP opp[];
 
+<<<<<<< HEAD
 struct player
 {
 	int pid, jetton, money;
 }button, sblind, bblind, nor[10], my;//nor[0].pid is the number of other players.
 //nor: other players.
 
+=======
+>>>>>>> origin/new
 int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 {
 	char* serverName;
@@ -320,7 +323,7 @@ void pre_action(int x, int *stage, int *stagenum, int round)
 	
 	if(x == SEAT_MSG && round == 0){
 		memset(opp, 0, sizeof(opp));
-		int i = 1;
+		int i = 0;
 		opp[i].pid = button.pid;
 		i++;
 		opp[i].pid = sblind.pid;
@@ -423,6 +426,7 @@ int main(int argc, char* agrv[]) {
 					
 			//pre action
 <<<<<<< HEAD
+<<<<<<< HEAD
 			if(x == SEAT_MSG && round == 0){
 				memset(opp, 0, sizeof(opp));
 				int i = 0;
@@ -504,6 +508,11 @@ int main(int argc, char* agrv[]) {
 			pre_action(x, &stage, &stagenum, round);
 			if (x == POT_MSG) continue;
 			if (x == INQUIRE_MSG) Mate1Action(round);
+=======
+			pre_action(x, &stage, &stagenum, round);
+			if(x == POT_MSG)break;
+
+>>>>>>> origin/new
 			//action
 			/* if(x == INQUIRE_MSG){
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
