@@ -422,7 +422,7 @@ int main(int argc, char* agrv[]) {
 			}
 #endif			
 			//pre action
-			if(x == SEAT_MSG){
+			if(x == SEAT_MSG && round == 0){
 				memset(opp, 0, sizeof(opp));
 				int i = 1;
 				opp[i].pid = button.pid;
