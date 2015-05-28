@@ -1,4 +1,5 @@
 #include "socket.h"
+#include"constant.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -69,4 +70,54 @@ void get_word(char msg[], int fd)
 			flag = 1;
 		}
 	}
+}
+
+void action(int x, int num, int fd)//1:check  2:call  3:raise num  4:all_in  5:fold
+{
+	char action_msg[25] = { 0 };
+	if (x == CHECK){
+		strcpy(action_msg, "check \n");
+	}
+	else if (x == CALL){
+		strcpy(action_msg, "call \n");
+	}
+	else if (x == RAISE){
+		char num1[10] = { 0 };
+		while (num > 0){
+			int ret = num % 10;
+			char tmp[2] = { 0 }; tmp[0] = ret + 48;
+			strcat(num1, tmp);
+			num /= 10;
+		}
+		strrev(num1);
+		strcpy(action_msg, "raise ");
+		strcat(action_msg, num1);
+		strcat(action_msg, " \n");
+	}
+	else if (x == ALLIN){
+		strcpy(action_msg, "all_in \n");
+	}
+	else if (x == FOLD){
+		strcpy(action_msg, "fold \n");
+	}
+	write(fd, action_msg, sizeof(action_msg));
+}
+
+void reg(int num, int fd, char* name_and_notify)
+{
+	char msg[50] = { 0 };
+	char num1[10] = { 0 };
+	while (num > 0){
+		int ret = num % 10;
+		char tmp[2] = { 0 }; tmp[0] = ret + 48;
+		strcat(num1, tmp);
+		num /= 10;
+	}
+	strrev(num1);
+	strcpy(msg, "reg: ");
+	strcat(msg, num1);
+	strcat(msg, name_and_notify);
+	write(fd, msg, sizeof(msg));
+
+	// reg: pid pname need_notify eol
 }

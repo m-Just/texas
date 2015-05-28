@@ -428,58 +428,6 @@ int main(int argc, char* agrv[]) {
 				break;
 			}
 
-			//action
-			/* if(x == INQUIRE_MSG){
-			int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
-			if(done[1].bet > mybet)needcall = 1;
-			int stage = 1;
-			if(com[0] > 0)stage += com[0] - 2;
-			double winrate;
-			if(stage == 1){//before flop
-			if(hold[0] == 0)winrate = 1.0/(double)plnum;
-			else{
-			Card pubc[6], handc[3];
-			change_to_Card(pubc, handc, hold, com);
-			winrate = win_rate(handc, pubc, com[0], plnum).second;
-			}
-			uplim = get_uplim(winrate, my.jetton);
-			if(needcall == 0)action(CHECK, 0, fd);
-			else{
-			if(done[1].bet > uplim)action(FOLD, 0, fd);
-			else action(CALL, 0, fd);
-			}
-			}
-			if(stage >= 2){
-			int f = 0;
-			Card pubc[6], handc[3];
-			change_to_Card(pubc, handc);
-			winrate = win_rate(handc, pubc, com[0], plnum);
-			int hold_poker = //get_level(...);  present nut hand
-			for(i = 1; i <= done[0].pid; i++){
-			if(done[i].pid == bblind.pid)f = 1;
-			int tmp = -1;
-			if(f == 0)tmp = estHand(done[i].pid, com, com[0], stage, round);
-			if(f == 1){
-			if(stage > 2)tmp = estHand(done[i].pid, com, com[0], stage - 1, round);
-			}
-			if(tmp != -1 && tmp != 0){
-			winrate *= (1 + (0.1 * (hold_poker - tmp - 1)));
-			}
-			}
-			uplim = get_uplim(winrate, my.jetton);
-			if(uplim > /*sth){
-			action(RAISE, /*snum.*, fd);
-					}
-			else{
-				if (needcall == 0)action(CHECK, 0, fd);
-				else{
-					if (done[1].bet > uplim)action(FOLD, 0, fd);
-					else action(CALL, 0, fd);
-				}
-			}
-		}
-	}*/
-
 }
 	}
 
