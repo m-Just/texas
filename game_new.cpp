@@ -1,4 +1,3 @@
-int hold[5], com[10], leastraise;
 #include <stdio.h>
 #include <stdlib.h>
 #include "socket.h"
@@ -14,11 +13,21 @@ int hold[5], com[10], leastraise;
 
 extern ANAOPP opp[];
 
+<<<<<<< HEAD
 struct player
 {
 	int pid, jetton, money;
 }button, sblind, bblind, nor[10], my;//nor[0].pid is the number of other players.
 //nor: other players.
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/new
+
+<<<<<<< HEAD
+
+>>>>>>> origin/new
 
 int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 {
@@ -38,6 +47,15 @@ int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 	reg(id, fd, "hdbdl need notify \n");
 
 }
+
+//read part-----------------------------------------------------------------------------
+int hold[5], com[10];
+
+struct player
+{
+	int pid, jetton, money;
+}button, sblind, bblind, nor[10], my;//nor[0].pid is the number of other players.
+//nor: other players.
 
 struct player_in_game
 {
@@ -225,6 +243,10 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 		}
 	}
 }
+//read part-----------------------------------------------------------------------------
+
+//main logic part--------------------------------------------------------------
+int leastraise, mybet;
 
 int get_uplim(double winrate, int jet, int mybet)
 {
@@ -266,13 +288,96 @@ int get_uplim(double winrate, int jet, int mybet)
 	//tmp*r*para = - n*r*para + n
 	//tmp*r*para / (1 - r*para) = n
 }
+//main logic part--------------------------------------------------------------
 
-//(tmp + n) * winrate - n - c
-//---------------------------------
-//             n
+//before action--------------------------------------------------------------------
+void pre_action(int x, int *stage, int *stagenum, int round)
+{
+	//get stage and init(leastraise)
+	if(x == BLIND_MSG)*stage = PREFLOP, *stagenum = 0, leastraise = BIG_BLIND;
+	if(x == HOLD_MSG)leastraise = BIG_BLIND;
+	if(x == COM_CARDS_MSG){
+		if(com[0] == 3)*stage = FLOP;
+		if(com[0] == 4)*stage = TURN;
+		if(com[0] == 5)*stage = RIVER;
+		*stagenum = 0;
+		leastraise = BIG_BLIND;
+	}
+	if(x == SHOW_MSG || x == POT_MSG)*stage = POT_WIN, *stagenum = 0;
+	//get stage and init(leastraise)
+	
+	
+	if(x == SEAT_MSG && round == 0){
+		memset(opp, 0, sizeof(opp));
+		int i = 1;
+		opp[i].pid = button.pid;
+		i++;
+		opp[i].pid = sblind.pid;
+		i++;
+		if(plnum > 2)opp[i].pid = bblind.pid, i++;
+		int j;
+		for(j = 1; j <= nor[0].pid; j++){
+			opp[i].pid = nor[j].pid;
+			i++;
+		}
+	}
+	if(x == SEAT_MSG){
+		int i;
+		i = hash(button.pid);			
+		opp[i].money[round] = button.money;
+		opp[i].jetton[round] = button.jetton;
 
-//(tmp*r - c)/n + r - 1 = y
-//c:current bet
+		i = hash(sblind.pid);
+		opp[i].money[round] = sblind.money;
+		opp[i].jetton[round] = sblind.jetton;
+				
+		if(plnum > 2){
+			i = hash(bblind.pid);
+			opp[i].money[round] = bblind.money;
+			opp[i].jetton[round] = bblind.jetton;
+		}
+		for(int j = 1; j <= nor[0].pid; j++){
+			i = hash(nor[j].pid);
+			opp[i].money[round] = nor[j].money;
+			opp[i].jetton[round] = nor[j].jetton;
+		}
+	}
+	if(x == INQUIRE_MSG || x == NOTIFY_MSG){
+		int i;
+		int f = 0;
+		*stagenum++;
+		for(i = 1; i <= done[0].pid; i++){
+			if(done[i].pid == my.pid){
+				my.jetton = done[i].jetton;
+				my.money = done[i].money;
+				mybet = done[i].bet;
+			}
+			if(done[i].pid == bblind.pid)f = 1;
+			if(f == 0 || *stagenum > 1){
+				int bet = done[i].bet;
+				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage, round);
+			}else{
+				int bet = done[i].bet;
+				if(*stage > 1)updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage - 1, round);
+				else updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage, round);
+			}
+			if(done[i].action == RAISE && done[i].pid != my.pid){
+				if(leastraise < done[i].bet - done[i + 1].bet)
+					leastraise = done[i].bet - done[i + 1].bet;
+			}
+		}
+#ifdef TEST
+		action(FOLD, 0, fd); 
+#endif
+	}
+	if(x == SHOW_MSG){
+		int i;
+		for(i = 1; i <= rank[0].pid; i++){
+			updateData(rank[i].pid, SHOW, rank[0].nut_hand*10+rank[i].nut_hand, -1, -1, POT_WIN, round);
+		}
+	}
+}
+//before action--------------------------------------------------------------------
 
 
 int main(int argc, char* agrv[]) {
@@ -289,7 +394,7 @@ int main(int argc, char* agrv[]) {
 	my.money = START_MONEY;
 
 	/* main round loop */
-	int round, flag = 0, mybet = 0;
+	int round, stage, stagenum;
 	for (round = 0; round < MAX_ROUND; round++) {
 		mybet = 0;
 		leastraise = BIG_BLIND;
@@ -306,6 +411,7 @@ int main(int argc, char* agrv[]) {
 			}
 					
 			//pre action
+<<<<<<< HEAD
 			if(x == SEAT_MSG && round == 0){
 				memset(opp, 0, sizeof(opp));
 				int i = 0;
@@ -384,6 +490,10 @@ int main(int argc, char* agrv[]) {
 				}
 				break;
 			}
+=======
+			pre_action(x, &stage, &stagenum, round);
+			if(x == POT_MSG)break;
+>>>>>>> origin/new
 			
 			//action
 			/* if(x == INQUIRE_MSG){
