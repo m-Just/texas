@@ -20,7 +20,7 @@
 
 struct ANAOPP{           // database structure, for the analysis of the opponents
 	int pid, style, cc;
-	int bet[MAX_ROUND][5], lastbet[MAX_ROUND], hand[MAX_ROUND], pattern[MAX_ROUND];
+	int bet[MAX_ROUND][4], lastbet[MAX_ROUND], hand[MAX_ROUND], pattern[MAX_ROUND];
 	int maxbet[10], maxbetRound[10]; // nine different poker hands. [0] for overall.
 	int currentAction, currentStage, money[MAX_ROUND+1], jetton[MAX_ROUND+1];
 	double avrgBet, variance, foldrate; // these values will be useful only after gathering enough info

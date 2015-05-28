@@ -20,7 +20,7 @@ int hash(int id) {
 }
 
 void iterate(double* value, double change, int roundNum) {
-	*value = (*value * roundNum + change) / (double)(roundNum+1);
+	*value = (*value * roundNum+1 + change) / (double)(roundNum+2);
 }
 
 double coco(int* x, int* y, int ini_i, int steplen, int stepsize, int totallen) { // Correlation Coefficient (0~1)
@@ -64,7 +64,7 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	// ESPECIALLY, input the poker hands into "num" for SHOW action.
 	// otherwise, input 0 if not available.	
 	int i = hash(id); int j;
-	opp[i].currentAction = action;					    
+	opp[i].currentAction = action;
 	opp[i].currentStage  = stage;
 	if (m 	!= -1) opp[i].money[roundNum]  = m;     /* notice: the value of "m" and "jet" is the last value received from the server */
 	if (jet != -1) opp[i].jetton[roundNum] = jet;
@@ -95,7 +95,7 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	}
 	else printf("Error: Invalid action#%d by player#%d at round#%d!\n", action, id, roundNum+1);
 	
-	opp[i].maxbet[0] = opp[i].maxbet[0] < *b ? *b : opp[i].maxbet[0];
+	if (opp[i].maxbet[0] < *b) { opp[i].maxbet[0] = *b; opp[i].maxbetRound[0] = roundNum; }
 
 	if (action == FOLD || action == SHOW) {  // the errors of the values below are big when roundNum is small
 		opp[i].lastbet[roundNum] = *b;
@@ -123,11 +123,11 @@ int patternAnalyse(int id) {
 	int i = hash(id);
 }
 
-double jettonPara(int id, int stage, int roundNum, int maxbetRound) {
+double jettonPara(int id, int stage, int roundNum, int maxbetRnd) {
 	int endStage, i = hash(id);
-	for (endStage = 1; endStage < RIVER; endStage++) if (!opp[i].bet[roundNum][endStage]) break;
+	for (endStage = 1; endStage < RIVER; endStage++) if (!opp[i].bet[maxbetRnd][endStage]) break;
 	double tmp = (double)(opp[i].bet[roundNum][stage-1]+opp[i].jetton[roundNum])/
-	       	     (double)(opp[i].bet[maxbetRound][endStage-1]+opp[i].jetton[maxbetRound]);
+	       	     (double)(opp[i].bet[maxbetRnd][endStage-1]+opp[i].jetton[maxbetRnd]);
 	return 1.0+(tmp-1.0)*opp[i].cc;
 }
 
@@ -219,7 +219,6 @@ int estFold(int id, int* card, int cardNum, int stage, int roundNum) { // return
 	int eHand = estHand(id, card, cardNum, stage, roundNum);       // the return value
 	if (opp[i].foldrate < 0.2 && opp[i].style == LOOSE) return 0;
 	if (opp[i].foldrate > 0.8 && opp[i].style == TIGHT) return opp[i].avrgBet*pow(2, eHand-1);
-	if (stage > PREFLOP && eHand > UNKNOWN && opp[i].maxbet[eHand])
+	if (stage > PREFLOP && stage <= RIVER && eHand > UNKNOWN && opp[i].maxbet[eHand])
 		return rnd(jettonPara(id, stage, roundNum, opp[i].maxbetRound[eHand])*opp[i].maxbet[eHand]/opp[i].foldrate);
-	else 	return 0;  // return 0 for unavailability
 }
