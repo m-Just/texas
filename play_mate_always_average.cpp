@@ -333,7 +333,7 @@ int main(int argc, char* agrv[]) {
 	if (fd != -1) printf("Connection established.\n");
 	else { printf("Connection failure. Program Abort.\n"); return 1; }
 
-	reg(id, fd, "always_average need notify/n");
+	reg(id, fd, "always_average need notify\n");
 
 	my.pid = id;
 	my.jetton = START_JETTON;
@@ -400,13 +400,16 @@ int main(int argc, char* agrv[]) {
 				double avrg = 0;
 				rate R;
 				if (com[0] >= 3) R = win_rate(hold + 1, com + 1, com[0], plnum); else R = make_pair(0.125, 0);
-				printf("%lf %lf\n", R.first, R.second);
 				double win = R.second;
-				for (int i = 1; i <= done[0].pid; i++)
+				for (int i = 0; i < 7; i++)
 				{
-					avrg += opp[hash(done[i].pid)].avrgBet;
+					avrg += opp[i].avrgBet * (opp[i].jetton[round] + opp[i].money[round]);
+					printf("round: %d id: %d money: %d jetton: %d\n", round, opp[i].pid, opp[i].money[round], opp[i].jetton[round]);
 				}
-				avrg /= plnum - 1;
+				printf("\n");
+				avrg /= 28000;
+				//printf("draw:%lf win:%lf avrg:%lf\n", R.first, R.second, avrg);
+				
 				int mebet = (int)(avrg * win * AVGC);
 				if (maxbet > mebet) action(FOLD, 0, fd); else action(RAISE, (int)(mebet - maxbet), fd);
 #endif

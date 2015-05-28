@@ -12,8 +12,13 @@ int rnd(double val) {
 
 /* Analysis */
 int hash(int id) {
-	int i = 0;
-	while (i < MAX_PLAYER_NUM && opp[i++].pid != 0) if (opp[i].pid == id) break;
+	int i = 1;
+	//while (i < MAX_PLAYER_NUM && opp[i++].pid != 0) if (opp[i].pid == id) break;
+	while (i < MAX_PLAYER_NUM && opp[i].pid != 0)
+	{
+		if (opp[i].pid == id) break;
+		i++;
+	}
 	opp[i].pid = id;
 	return i;
 }
