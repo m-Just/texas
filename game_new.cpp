@@ -14,13 +14,32 @@ int hold[5], com[10];
 
 extern ANAOPP opp[];
 
-/*
+
 struct player
 {
 	int pid, jetton, money;
 }button, sblind, bblind, nor[10], my;//nor[0].pid is the number of other players.
 //nor: other players.
-*/
+
+
+int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
+{
+	char* serverName;
+	char* hostName;
+	unsigned short serverPort, hostPort, id;
+	serverName = agrv[1];
+	serverPort = atoi(agrv[2]);
+	hostName = agrv[3];
+	hostPort = atoi(agrv[4]);
+	id = atoi(agrv[5]);
+	int fd = establishConnection(serverName, serverPort, hostName, hostPort);
+
+	if (fd != -1) printf("Connection established.\n");
+	else { printf("Connection failure. Program Abort.\n"); return 1; }
+
+	reg(id, fd, "hdbdl need notify \n");
+
+}
 
 struct player_in_game
 {
@@ -223,34 +242,15 @@ int get_uplim(double winrate, int jet, int mybet)
 
 
 int main(int argc, char* agrv[]) {
-	/* connect to server */
 	int fd; // socket id code
-	char* serverName;
-	char* hostName;
-	unsigned short serverPort, hostPort, id;
 
 #ifdef WRITE_IN_FILE
 	FILE * fout = freopen("melog.txt", "w", stdout);
 #endif
-
-#ifdef TEST
-	printf("%d\n",time(0));
-	Card hand_card[2], common_card[7];
-#endif
 	
-	serverName = agrv[1];
-	serverPort = atoi(agrv[2]);
-	hostName = agrv[3];
-	hostPort = atoi(agrv[4]);
-	id = atoi(agrv[5]);
+	fd = ConnectAndReg(argc, agrv);
 
-	fd = establishConnection(serverName, serverPort, hostName, hostPort);
-	if (fd != -1) printf("Connection established.\n");
-	else {  printf("Connection failure. Program Abort.\n"); return 1;}
-
-	reg(id, fd, "hdbdl need notify \n");
-
-	my.pid = id;
+	my.pid = atoi(agrv[5]);;
 	my.jetton = START_JETTON;
 	my.money = START_MONEY;
 

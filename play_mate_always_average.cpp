@@ -13,7 +13,7 @@ int hold[5], com[10];
 #include <time.h>
 #endif
 
-extern ANAOPP opp[MAX_PLAYER_NUM];
+extern ANAOPP opp[];
 
 struct player
 {
