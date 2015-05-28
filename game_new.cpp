@@ -354,7 +354,7 @@ int main(int argc, char* agrv[]) {
 			if(x == SHOW_MSG){
 				int i;
 				for(i = 1; i <= rank[0].pid; i++){
-					updateData(rank[i].pid, SHOW, rank[i].nut_hand, -1, -1, POT_WIN, round);
+					updateData(rank[i].pid, SHOW, 10*rank[0].nut_hand+rank[i].nut_hand, -1, -1, POT_WIN, round);
 				}
 			}
 			if(x == POT_MSG){
