@@ -387,9 +387,11 @@ int main(int argc, char* agrv[]) {
 				}
 				if(stage >= 2){
 					int f = 0;
+					double rel_winrate;
 					Card pubc[6], handc[3];
 					change_to_Card(pubc, handc);
 					winrate = win_rate(handc, pubc, com[0], plnum);
+					rel_winrate = winrate;
 					int hold_poker = //get_level(...);  present nut hand
 					for(i = 1; i <= done[0].pid; i++){
 						if(done[i].pid == bblind.pid)f = 1;
@@ -399,10 +401,13 @@ int main(int argc, char* agrv[]) {
 							if(stage > 2)tmp = estHand(done[i].pid, com, com[0], stage - 1, round);
 						}
 						if(tmp != -1 && tmp != 0){
-							winrate *= (1 + (0.1 * (hold_poker - tmp - 1)));
+							rel_winrate *= (1 + (0.1 * (hold_poker - tmp - 1)));
 						}
 					}
-					uplim = get_uplim(winrate, my.jetton);
+					double ret = 1.0;
+					for(int i = 1; i <= 8 - plnum; i++)ret *= 0.9;
+					ret_winrate *= ret;
+					uplim = get_uplim(rel_winrate, my.jetton);
 					if(uplim > ){
 						action(RAISE, /*snum., fd);
 					}else{
