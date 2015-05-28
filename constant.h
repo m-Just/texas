@@ -56,4 +56,5 @@
 #define TEST
 #define TESTNEW
 #define WRITE_IN_FILE
+#define max(a, b) ((a) < (b))?(b):(a)
 #endif

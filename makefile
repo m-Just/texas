@@ -6,13 +6,12 @@ objects = $(GAME).o opponent.o conversion.o rate.o Card.o socket.o
 avg : $(objects)
 	g++ -o avg $(objects)
 $(GAME).o : opponent.h conversion.h Card.h socket.h constant.h
-	g++ -c $(GAME).cpp
+	g++ -g -c $(GAME).cpp
 opponent.o : opponent.h conversion.h constant.h
-	g++ -c opponent.cpp
+	g++ -g -c opponent.cpp
+socket.o : socket.h conversion.h
 conversion.o : conversion.h Card.h
 Card.o : Card.h
-socket.o : socket.h
-
    .PHONY : clean
    clean :
 	rm avg $(objects)

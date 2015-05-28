@@ -5,9 +5,11 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
+#include "conversion.h"
 
 int establishConnection(char* serverName, unsigned short serverPort, char* hostName, unsigned short hostPort) {
 	int s, connected = 0, opt;

@@ -292,21 +292,7 @@ int main(int argc, char* agrv[]) {
 				disconnect(fd);
 				return 0;
 			}
-			
-#ifdef TEST_RATE
-			if (x == COM_CARDS_MSG && com[0] >= 3)
-			{
-				for (int i = 0; i < hold[0]; i++) hand_card[i] = int2card(hold[i + 1]);
-				for (int i = 0; i < com[0]; i++) common_card[i] = int2card(com[i + 1]);
-				rate win_and_draw = win_rate(hand_card, common_card, com[0], plnum);
-				printf("/****************************/\n");
-				printf("player alive:%d\n", plnum);
-				print_Card(hand_card, hold[0], "hand card");
-				print_Card(common_card, com[0], "common card");
-				printf("\nwin_rate: %lf, draw_rate: %lf\n", win_and_draw.second, win_and_draw.first);
-				printf("/****************************/\n");
-			}
-#endif			
+						
 			//pre action
 			if(x == SEAT_MSG && round == 0){
 				memset(opp, 0, sizeof(opp));
