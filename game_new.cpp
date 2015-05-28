@@ -330,6 +330,13 @@ int main(int argc, char* agrv[]) {
 					i++;
 				}
 			}
+			if(x == SEAT_MSG){
+				int i;
+				i = hash(button.pid);
+				opp[i].money[round] = button.money;
+				opp[i].jetton[round] = button.jetton;
+			
+			}
 			if(x == INQUIRE_MSG || x == NOTIFY_MSG){
 				int i;
 				int stage = 1, f = 0;
