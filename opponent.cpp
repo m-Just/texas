@@ -68,6 +68,9 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	// num is only available for CALL, RAISE, BLIND, SHOW and POT actions.
 	// ESPECIALLY, input the poker hands into "num" for SHOW action.
 	// otherwise, input 0 if not available.	
+#ifdef TEST
+	FILE *fout = fopen("opponent.txt", "a");
+#endif
 	int i = hash(id); int j;
 	opp[i].currentAction = action;
 	opp[i].currentStage  = stage;
@@ -106,6 +109,9 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 		opp[i].lastbet[roundNum] = *b;
 		opp[i].cc = coco(opp[i].lastbet, opp[i].jetton, 0, 20, 10, roundNum);
 		iterate(&opp[i].avrgBet,  (double)*b, roundNum);
+#ifdef TEST
+		fprintf(fout, "round %d player%d : bet:%d\n", round, opp[i].pid, *b);
+#endif
 		iterate(&opp[i].variance, pow((double)(*b-opp[i].avrgBet), 2.0), roundNum);
 		iterate(&opp[i].foldrate, (double)(action%SHOW)/FOLD, roundNum);
 	}
@@ -116,6 +122,9 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 		else    /* avrgBet >= 5BB */	       opp[i].style = LOOSE;
 	}
 
+#ifdef TEST
+	fclose(fout);
+#endif
 	// check if the estimate() is right. if not, re-analyse and considering bluff-playing.
 }
 
