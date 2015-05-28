@@ -22,8 +22,38 @@ void iterate(double* value, double change, int roundNum) {
 	*value = (*value * roundNum + change) / (double)(roundNum+1);
 }
 
-double coco(void* x, void* y, int stepsize) { // Correlation Coefficient
-	
+double coco(int* x, int* y, int ini_i, int steplen, int stepsize, int totallen) { // Correlation Coefficient (0~1)
+	// assuming steplen = 20, stepsize = 10
+	int i, j, cnt = 0, yistmp = 0;
+	if (totallen < steplen + stepsize) return 1;
+	if (y == NULL) {
+		y = (int*)malloc(sizeof(int)*totallen); yistmp = 1;
+		for (i = ini_i; i < ini_i+totallen; i++) if (x[i]) y[i] = i;
+	}
+	int len = (totallen-steplen)/stepsize+1;
+	double xa[len], ya[len];
+	double xaa = 0, yaa = 0;
+
+	cnt = 0;
+	for (i = ini_i; i < ini_i+(len-1)*stepsize; i+=stepsize) {
+		xa[cnt] = 0; ya[cnt] = 0;
+		for (j = i; j < i+steplen; j++) { if (x[j]) xa[cnt] += x[j]; ya[cnt] += y[j]; } cnt++;
+	}
+	for (i = 0; i < len; i++) { xaa += xa[i]; yaa += ya[i]; }
+	xaa /= len; yaa /= len;
+
+	if (yistmp) free(y);
+
+	double upper = 0, xd = 0, yd = 0;
+	for (i = 0; i < len; i++) {
+		upper += (xa[i]-xaa)*(ya[i]-yaa);
+		xd    += pow(xa[i]-xaa, 2.0);
+		yd    += pow(ya[i]-yaa, 2.0);
+	}
+
+	if (xd && yd) 
+		return upper/sqrt(xd*yd);
+	else	return 1;    // return 1 for absolute linear correlation
 }
 
 // update after every inquire, notify(if available), showdown and pot-win message
@@ -35,8 +65,8 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	int i = hash(id); int j;
 	opp[i].currentAction = action;					    
 	opp[i].currentStage  = stage;
-	if (m != -1)   opp[i].money[roundNum]  = m;     /* notice: the value of "m" and "jet" is the last value received from the server */
-	if (jet != -1) opp[i].jetton[roundNum] = jet;   /* when the action is POT, the change in "m" and "jet" is done by "num" */
+	if (m 	!= -1) opp[i].money[roundNum]  = m;     /* notice: the value of "m" and "jet" is the last value received from the server */
+	if (jet != -1) opp[i].jetton[roundNum] = jet;   
 
 	if 	(action == QUIT || action == CHECK) {/* do nothing */}
 	else if (action == CALL || action == RAISE) opp[i].bet[roundNum][stage-1] = num;
@@ -44,33 +74,36 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	else if (action == FOLD)  opp[i].hand[roundNum] = NA;	
 	else if (action == BLIND) opp[i].bet[roundNum][stage-1] = num;
 	else if (action == SHOW) {
-		opp[i].hand[roundNum] = num; // num is the code for poker hands
-		if (num < 2 && opp[i].bet[roundNum][stage-1] > (double)opp[i].jetton[roundNum]/3) opp[i].style = BLUFF;
-		for (j = 1; j <= STRAIGHT_FLUSH-num; j++)
-			if (opp[i].maxbet[num+j] && opp[i].bet[roundNum][stage-1] > opp[i].maxbet[num+j]) {
+		opp[i].hand[roundNum] = num%10; // num := best_hand*10+nut_hand
+		/* bluff detection */
+		if (roundNum >= 20 && opp[i].foldrate)
+			if (opp[i].hand[roundNum]+2 <= num/10 && opp[i].bet[roundNum][RIVER-1] > opp[i].avrgBet/opp[i].foldrate)
+				opp[i].style = BLUFF;
+		for (j = 1; j <= STRAIGHT_FLUSH-opp[i].hand[roundNum]; j++)
+			if (opp[i].maxbet[opp[i].hand[roundNum]+j] && opp[i].bet[roundNum][RIVER-1] >
+			    jettonPara(id, stage, roundNum, opp[i].maxbetRound[opp[i].hand[roundNum]+j])*opp[i].maxbet[opp[i].hand[roundNum]+j]) {
 				opp[i].style = BLUFF; break;
 			}
+
 		if (opp[i].style != BLUFF)
-			if (opp[i].maxbet[num] < opp[i].bet[roundNum][stage-1]) {
-				opp[i].maxbet[num] = opp[i].bet[roundNum][stage-1];
+			if (opp[i].maxbet[num] < opp[i].bet[roundNum][RIVER-1]) {
+				opp[i].maxbet[num] = opp[i].bet[roundNum][RIVER-1];
 				opp[i].maxbetRound[num] = roundNum;
 			}
-	}
-	else if (action == POT)  {
-		opp[i].jetton[roundNum+1] = opp[i].jetton[roundNum]+num; 
-		opp[i].money[roundNum+1]  = opp[i].money[roundNum]+num;
 	}
 	else printf("Error: Invalid action#%d by player#%d at round#%d!\n", action, id, roundNum+1);
 	
 	opp[i].maxbet[0] = opp[i].maxbet[0] < opp[i].bet[roundNum][stage-1] ? opp[i].bet[roundNum][stage-1] : opp[i].maxbet[0];
 
 	if (action == FOLD || action == SHOW) {  // the errors of the values below are big when roundNum is small
+		opp[i].lastbet[roundNum] = opp[i].bet[roundNum][stage-1];
+		opp[i].cc = coco(opp[i].lastbet, opp[i].jetton, 0, 20, 10, roundNum);
 		iterate(&opp[i].avrgBet,  (double)opp[i].bet[roundNum][stage-1], roundNum);
 		iterate(&opp[i].variance, pow((double)(opp[i].bet[roundNum][stage-1])-opp[i].avrgBet, 2.0), roundNum);
 		iterate(&opp[i].foldrate, (double)(action%SHOW)/FOLD, roundNum);
 	}
 	
-	if (roundNum > 0 && !roundNum%10 && opp[i].style != BLUFF) {
+	if (roundNum > 0 && !(roundNum%10) && opp[i].style != BLUFF) {
 		if 	(opp[i].avrgBet < 2*BIG_BLIND) opp[i].style = TIGHT;
 		else if (opp[i].avrgBet < 5*BIG_BLIND) opp[i].style = NORMAL;
 		else    /* avrgBet >= 5BB */	       opp[i].style = LOOSE;
@@ -90,9 +123,10 @@ int patternAnalyse(int id) {
 
 double jettonPara(int id, int stage, int roundNum, int maxbetRound) {
 	int endStage, i = hash(id);
-	for (endStage = 1; endStage < POT_WIN; endStage++) if (!opp[i].bet[roundNum][endStage]) break;
-	return (double)(opp[i].bet[roundNum][stage-1]+opp[i].jetton[roundNum])/
-	       (double)(opp[i].bet[maxbetRound][endStage-1]+opp[i].jetton[maxbetRound]);
+	for (endStage = 1; endStage < RIVER; endStage++) if (!opp[i].bet[roundNum][endStage]) break;
+	double tmp = (double)(opp[i].bet[roundNum][stage-1]+opp[i].jetton[roundNum])/
+	       	     (double)(opp[i].bet[maxbetRound][endStage-1]+opp[i].jetton[maxbetRound]);
+	return 1.0+(tmp-1.0)*opp[i].cc;
 }
 
 /* Playing Style Decisive Critrion */
@@ -110,6 +144,7 @@ double jettonPara(int id, int stage, int roundNum, int maxbetRound) {
 int estHand(int id, int* card, int cardNum, int stage, int roundNum) { // estimating the most possible poker hand the opponent's got
 	// by study the opponent's possible hands and pattern of actions(style).
 	int i = hash(id);
+	int b = opp[i].bet[roundNum][stage-1];
 
 	int point[13] = {0}, color[4] = {0};
 	int m, n;
@@ -144,24 +179,29 @@ int estHand(int id, int* card, int cardNum, int stage, int roundNum) { // estima
 		for (m = 0; m < cnt-2; m++) if (p[m+2]-p[m] < 5) highestHand = STRAIGHT_FLUSH;
 		for (m = 0; m < cnt-3; m++) if (p[m+3]-p[m] < 5) potentHand  = STRAIGHT_FLUSH;
 	}
+	
+	double betcchand = 0; int cnt = 0;
+	for (m = 1; m < 10; m++) if (opp[i].maxbet[m]) cnt++;
+	if (cnt > 2) betcchand = coco(opp[i].maxbet, NULL, 1, 1, 1, 9);
 
 	/* main logic */  // the logic concerning decision making and bluff-playing needs to be improved
 	if (opp[i].currentAction == CHECK || opp[i].currentAction == FOLD) { 
 		if (opp[i].maxbet[lowestHand] < opp[i].bet[roundNum][stage-1]) {
-			opp[i].maxbet[lowestHand] = opp[i].bet[roundNum][stage-1];
+			opp[i].maxbet[lowestHand] = b; 
 			opp[i].maxbetRound[lowestHand] = roundNum;
 		}
 		return lowestHand;
 	} else
-	if (opp[i].currentAction == RAISE || opp[i].currentAction == CALL) {
+	if (opp[i].currentAction == RAISE || opp[i].currentAction == CALL)  {
 		if (opp[i].maxbet[potentHand]) {
-			if (opp[i].bet[roundNum][stage-1] >
-				jettonPara(id, stage, roundNum, opp[i].maxbetRound[potentHand])*(highestHand-potentHand+1)*opp[i].maxbet[potentHand] ||
-			   (opp[i].maxbet[highestHand-1] &&
-			    opp[i].bet[roundNum][stage-1] >
-				jettonPara(id, stage, roundNum, opp[i].maxbetRound[highestHand-1])*opp[i].maxbet[highestHand-1])) {
+			if (betcchand > 0.6)
+				for (m = potentHand; m <= highestHand; m++)
+					if (b > /*slope*/1.5*(m-potentHand+1)*opp[i].maxbet[potentHand])   // the slope should be further determined
+						return m+(m != STRAIGHT_FLUSH);
+			if (opp[i].maxbet[highestHand-1] &&
+			    b > jettonPara(id, stage, roundNum, opp[i].maxbetRound[highestHand-1])*opp[i].maxbet[highestHand-1]) {
 				return highestHand;
-			} else  return potentHand;
+			} else  return potentHand;    // not accurate enough
 		} else return UNKNOWN;
 	} else
 	if (opp[i].currentAction == ALLIN) {

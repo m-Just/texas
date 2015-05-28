@@ -1,6 +1,7 @@
 #ifndef OPPONENT_H
 #define OPPONENT_H
 #include "constant.h"
+#include <stdlib.h>
 
 // the styles and patterns may not be needed.
 /* Opponent's Playing Styles */
@@ -18,8 +19,8 @@
 #define CHAOS   4
 
 struct ANAOPP{           // database structure, for the analysis of the opponents
-	int pid, style;
-	int bet[MAX_ROUND][5], hand[MAX_ROUND], pattern[MAX_ROUND];
+	int pid, style, cc;
+	int bet[MAX_ROUND][5], lastbet[MAX_ROUND], hand[MAX_ROUND], pattern[MAX_ROUND];
 	int maxbet[10], maxbetRound[10]; // nine different poker hands. [0] for overall.
 	int currentAction, currentStage, money[MAX_ROUND+1], jetton[MAX_ROUND+1];
 	double avrgBet, variance, foldrate; // these values will be useful only after gathering enough info
@@ -33,7 +34,7 @@ int hash(int id);
 
 void iterate(double* value, double change, int roundNum);
 
-double coco(void* x, void* y, int stepsize);
+double coco(int* x, int* y, int ini_i, int steplen, int stepsize, int totallen);
 
 int updateData(int id, int action, int num, int jet, int m, int stage, int roundNum);
 
