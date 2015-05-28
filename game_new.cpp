@@ -224,15 +224,15 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 	}
 }
 
-int get_uplim(double winrate, int jet)
+int get_uplim(double winrate, int jet, int mybet)
 {
-	int tmp = pot, f = 0;
+	int tmp = pot - mybet, f = 0;
 	int i;
 	for(i = 1; i <= done[0].pid; i++){
 		if(done[i].pid == bblind.pid)f = 1;
-		if(f == 1){
+		if(f == 1 && done[i].pid != my.pid){
 			int x = hash(done[i].pid);
-			if(opp[x].maxbet[0])tmp += opp[x].maxbet[0];
+			if(opp[x].avrgBet[0])tmp += opp[x].avrgBet[0];
 			else tmp += 30;
 		}
 	}
@@ -244,6 +244,14 @@ int get_uplim(double winrate, int jet)
 	//tmp*r*para = - n*r*para + n
 	//tmp*r*para / (1 - r*para) = n
 }
+
+//(tmp + n) * winrate - n - c
+//---------------------------------
+//             n
+
+//(tmp*r - c)/n + r - 1 = y
+//c:current bet
+
 
 int main(int argc, char* agrv[]) {
 	/* connect to server */
@@ -292,7 +300,21 @@ int main(int argc, char* agrv[]) {
 				disconnect(fd);
 				return 0;
 			}
-						
+			
+#ifdef TEST_RATE
+			if (x == COM_CARDS_MSG && com[0] >= 3)
+			{
+				for (int i = 0; i < hold[0]; i++) hand_card[i] = int2card(hold[i + 1]);
+				for (int i = 0; i < com[0]; i++) common_card[i] = int2card(com[i + 1]);
+				rate win_and_draw = win_rate(hand_card, common_card, com[0], plnum);
+				printf("/****************************/\n");
+				printf("player alive:%d\n", plnum);
+				print_Card(hand_card, hold[0], "hand card");
+				print_Card(common_card, com[0], "common card");
+				printf("\nwin_rate: %lf, draw_rate: %lf\n", win_and_draw.second, win_and_draw.first);
+				printf("/****************************/\n");
+			}
+#endif			
 			//pre action
 			if(x == SEAT_MSG && round == 0){
 				memset(opp, 0, sizeof(opp));
@@ -340,7 +362,7 @@ int main(int argc, char* agrv[]) {
 			if(x == SHOW_MSG){
 				int i;
 				for(i = 1; i <= rank[0].pid; i++){
-					updateData(rank[i].pid, SHOW, 10*rank[0].nut_hand+rank[i].nut_hand, -1, -1, POT_WIN, round);
+					updateData(rank[i].pid, SHOW, rank[i].nut_hand, -1, -1, POT_WIN, round);
 				}
 			}
 			if(x == POT_MSG){
@@ -364,7 +386,7 @@ int main(int argc, char* agrv[]) {
 						change_to_Card(pubc, handc, hold, com);
 					 	winrate = win_rate(handc, pubc, com[0], plnum).second;	
 					}
-					uplim = get_uplim(winrate, my.jetton);
+					uplim = get_uplim(winrate, my.jetton, mybet);
 					if(needcall == 0)action(CHECK, 0, fd);
 					else{
 						if(done[1].bet > uplim)action(FOLD, 0, fd);
@@ -393,7 +415,7 @@ int main(int argc, char* agrv[]) {
 					double ret = 1.0;
 					for(int i = 1; i <= 8 - plnum; i++)ret *= 0.9;
 					ret_winrate *= ret;
-					uplim = get_uplim(rel_winrate, my.jetton);
+					uplim = get_uplim(rel_winrate, my.jetton, mybet);
 					if(uplim > ){
 						action(RAISE, /*snum., fd);
 					}else{
