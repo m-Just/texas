@@ -339,7 +339,21 @@ int main(int argc, char* agrv[]) {
 				i = hash(button.pid);
 				opp[i].money[round] = button.money;
 				opp[i].jetton[round] = button.jetton;
-			
+				
+				i = hash(sblind.pid);
+				opp[i].money[round] = sblind.money;
+				opp[i].jetton[round] = sblind.jetton;
+				
+				if(plnum > 2){
+					i = hash(bblind.pid);
+					opp[i].money[round] = bblind.money;
+					opp[i].jetton[round] = bblind.jetton;
+				}
+				for(int j = 1; j <= nor[0].pid; j++){
+					i = hash(nor[j].pid);
+					opp[i].money[round] = nor[j].money;
+					opp[i].jetton[round] = nor[j].jetton;
+				}
 			}
 			if(x == INQUIRE_MSG || x == NOTIFY_MSG){
 				int i;
@@ -364,6 +378,10 @@ int main(int argc, char* agrv[]) {
 						else bet = done[i].bet;
 						if(stage > 1)updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage - 1, round);
 						else updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage, round);
+					}
+					if(done[i].action == RAISE && done[i].pid != my.pid){
+						if(leastraise < done[i].bet - done[i + 1].bet)
+							leastraise = done[i].bet - done[i + 1].bet;
 					}
 				}
 #ifdef TEST
