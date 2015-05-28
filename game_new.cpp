@@ -322,6 +322,7 @@ int main(int argc, char* agrv[]) {
 	if (fd != -1) printf("Connection established.\n");
 	else {  printf("Connection failure. Program Abort.\n"); return 1;}
 
+	reg(id, fd, "hdbdl need notify \n");
 
 	my.pid = id;
 	my.jetton = START_JETTON;
