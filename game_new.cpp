@@ -287,16 +287,18 @@ int get_uplim(double winrate, int jet, int mybet)
 //before action--------------------------------------------------------------------
 void pre_action(int x, int *stage, int *stagenum, int round)
 {
-	//get stage
-	if(x == BLIND_MSG)*stage = PREFLOP, *stagenum = 0;
+	//get stage and init(leastraise)
+	if(x == BLIND_MSG)*stage = PREFLOP, *stagenum = 0, leastraise = BIG_BLIND;
+	if(x == HOLD_MSG)leastraise = BIG_BLIND;
 	if(x == COM_CARDS_MSG){
 		if(com[0] == 3)*stage = FLOP;
 		if(com[0] == 4)*stage = TURN;
 		if(com[0] == 5)*stage = RIVER;
 		*stagenum = 0;
+		leastraise = BIG_BLIND;
 	}
 	if(x == SHOW_MSG || x == POT_MSG)*stage = POT_WIN, *stagenum = 0;
-	//get stage
+	//get stage and init(leastraise)
 	
 	
 	if(x == SEAT_MSG && round == 0){
