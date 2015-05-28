@@ -221,4 +221,5 @@ int estFold(int id, int* card, int cardNum, int stage, int roundNum) { // return
 	if (opp[i].foldrate > 0.8 && opp[i].style == TIGHT) return opp[i].avrgBet*pow(2, eHand-1);
 	if (stage > PREFLOP && stage <= RIVER && eHand > UNKNOWN && opp[i].maxbet[eHand])
 		return rnd(jettonPara(id, stage, roundNum, opp[i].maxbetRound[eHand])*opp[i].maxbet[eHand]/opp[i].foldrate);
+	else 	return 0;
 }
