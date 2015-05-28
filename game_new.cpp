@@ -14,17 +14,11 @@ int hold[5], com[10], leastraise;
 
 extern ANAOPP opp[];
 
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/new
 struct player
 {
 	int pid, jetton, money;
 }button, sblind, bblind, nor[10], my;//nor[0].pid is the number of other players.
 //nor: other players.
-<<<<<<< HEAD
-
 
 int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 {
@@ -44,8 +38,6 @@ int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 	reg(id, fd, "hdbdl need notify \n");
 
 }
-=======
->>>>>>> origin/new
 
 struct player_in_game
 {
@@ -292,7 +284,7 @@ int main(int argc, char* agrv[]) {
 	
 	fd = ConnectAndReg(argc, agrv);
 
-	my.pid = atoi(agrv[5]);;
+	my.pid = atoi(agrv[5]);
 	my.jetton = START_JETTON;
 	my.money = START_MONEY;
 
@@ -312,25 +304,11 @@ int main(int argc, char* agrv[]) {
 				disconnect(fd);
 				return 0;
 			}
-			
-#ifdef TEST_RATE
-			if (x == COM_CARDS_MSG && com[0] >= 3)
-			{
-				for (int i = 0; i < hold[0]; i++) hand_card[i] = int2card(hold[i + 1]);
-				for (int i = 0; i < com[0]; i++) common_card[i] = int2card(com[i + 1]);
-				rate win_and_draw = win_rate(hand_card, common_card, com[0], plnum);
-				printf("/****************************/\n");
-				printf("player alive:%d\n", plnum);
-				print_Card(hand_card, hold[0], "hand card");
-				print_Card(common_card, com[0], "common card");
-				printf("\nwin_rate: %lf, draw_rate: %lf\n", win_and_draw.second, win_and_draw.first);
-				printf("/****************************/\n");
-			}
-#endif			
+					
 			//pre action
 			if(x == SEAT_MSG && round == 0){
 				memset(opp, 0, sizeof(opp));
-				int i = 1;
+				int i = 0;
 				opp[i].pid = button.pid;
 				i++;
 				opp[i].pid = sblind.pid;
@@ -392,9 +370,6 @@ int main(int argc, char* agrv[]) {
 							leastraise = done[i].bet - done[i + 1].bet;
 					}
 				}
-#ifdef TEST
-				action(FOLD, 0, fd); 
-#endif
 			}
 			if(x == SHOW_MSG){
 				int i;
@@ -407,6 +382,7 @@ int main(int argc, char* agrv[]) {
 				for(i = 1; i <= win[0].pid; i++){
 					updateData(win[i].pid, POT, win[i].num, -1, -1, POT_WIN, round);
 				}
+				break;
 			}
 			
 			//action
