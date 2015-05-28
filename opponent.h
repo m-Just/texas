@@ -50,6 +50,8 @@ int estHand(int id, int* card, int cardNum, int stage, int roundNum);
 
 int estFold(int id, int* card, int cardNum, int stage, int roundNum);
 
+void compute(int); // record lastbet, averagebet and variance
+
 void oppclear();
 
 

@@ -42,7 +42,7 @@
 #define FLOP    2
 #define TURN    3
 #define RIVER   4 // including pot_win
-#define POT_WIN RIVER
+#define POT_WIN 5
 
 /* Basic Information */  // updated 5.25
 #define MAX_PLAYER_NUM 8

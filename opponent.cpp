@@ -68,7 +68,7 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	// num is only available for CALL, RAISE, BLIND, SHOW and POT actions.
 	// ESPECIALLY, input the poker hands into "num" for SHOW action.
 	// otherwise, input 0 if not available.	
-#ifdef TEST
+#ifdef _TEST
 	FILE *fout = fopen("opponent.txt", "a");
 #endif
 	int i = hash(id); int j;
@@ -105,16 +105,17 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	
 	if (opp[i].maxbet[0] < *b) { opp[i].maxbet[0] = *b; opp[i].maxbetRound[0] = roundNum; }
 
-	if (action == FOLD || action == SHOW) {  // the errors of the values below are big when roundNum is small
+	/*
+	if (action == FOLD || action == SHOW ) {  // the errors of the values below are big when roundNum is small
 		opp[i].lastbet[roundNum] = *b;
 		opp[i].cc = coco(opp[i].lastbet, opp[i].jetton, 0, 20, 10, roundNum);
 		iterate(&opp[i].avrgBet,  (double)*b, roundNum);
 #ifdef TEST
-		fprintf(fout, "round %d player%d : bet:%d\n", round, opp[i].pid, *b);
+		fprintf(fout, "round %d player%d : bet:%d\n", roundNum, opp[i].pid, *b);
 #endif
 		iterate(&opp[i].variance, pow((double)(*b-opp[i].avrgBet), 2.0), roundNum);
 		iterate(&opp[i].foldrate, (double)(action%SHOW)/FOLD, roundNum);
-	}
+	}*/
 	
 	if (roundNum > 0 && !(roundNum%10) && opp[i].style != BLUFF) {
 		if 	(opp[i].avrgBet < 2*BIG_BLIND) opp[i].style = TIGHT;
@@ -122,10 +123,30 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 		else    /* avrgBet >= 5BB */	       opp[i].style = LOOSE;
 	}
 
-#ifdef TEST
+#ifdef _TEST
 	fclose(fout);
 #endif
 	// check if the estimate() is right. if not, re-analyse and considering bluff-playing.
+}
+
+void compute(int roundNum)
+{
+#ifdef TEST
+	FILE *fout = fopen("opponent.txt", "a");
+#endif
+	for (int i = 0; i < 8; i++) if (opp[i].money > 0)
+	{
+		double lastbet = opp[i].bet[roundNum][RIVER - 1];
+		iterate(&opp[i].avrgBet, lastbet, roundNum);
+		iterate(&opp[i].variance, pow(lastbet - opp[i].avrgBet, 2.0), roundNum);
+		//fprintf(fout, "round: %d id: %d lastbet: %d average: %lf variance: %lf\n", roundNum, opp[i].pid, (int)lastbet, opp[i].avrgBet, opp[i].variance);
+		fprintf(fout, "round: %d player:%d", roundNum, opp[i].pid);
+		for (int j = 0; j < RIVER; j++) fprintf(fout, "%d ", opp[i].bet[roundNum][j]);
+		fprintf(fout, "\n");
+	}
+#ifdef TEST
+	fclose(fout);
+#endif
 }
 
 int styleAnalyse(int id) {
