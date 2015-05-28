@@ -404,7 +404,7 @@ int main(int argc, char* agrv[]) {
 				for (int i = 0; i < 7; i++)
 				{
 					avrg += opp[i].avrgBet * (opp[i].jetton[round] + opp[i].money[round]);
-					printf("round: %d id: %d money: %d jetton: %d\n", round, opp[i].pid, opp[i].money[round], opp[i].jetton[round]);
+					printf("round: %d id: %d money: %d jetton: %d average bet: %lf\n", round, opp[i].pid, opp[i].money[round], opp[i].jetton[round], opp[i].avrgBet);
 				}
 				printf("\n");
 				avrg /= 28000;

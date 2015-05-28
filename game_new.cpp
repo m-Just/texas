@@ -14,69 +14,6 @@ int hold[5], com[10];
 
 extern ANAOPP opp[MAX_PLAYER_NUM];
 
-char * strrev(char *str)
-{
-  char *right = str;
-  char *left = str;
-  char ch;
-  while (*right)   right++;
-  right--;
-  while (left < right)
-  {
-    ch = *left;
-    *left++ = *right;
-    *right-- = ch;
-  }
-  return(str);
-}
-
-
-void get_word(char msg[], int fd)
-{
-    char tmp[2];
-    int flag = 0;
-    msg[0] = 0;
-    while(1){
-		while (read(fd, tmp, sizeof(tmp[0])) == 0)
-		{
-			usleep(1000 * 5);
-			printf("Nothing in socket for read!\n");
-		}
-			;
-#endif
-        if(tmp[0] == ' ' || tmp[0] == '\n'){
-            if(flag == 1){
-#ifdef TEST
-			//printf("%s\n",msg);	
-#endif
-			break;
-	    }
-        }else{
-			char tmp1[2] = {0, 0};
-			tmp1[0] = tmp[0];
-			strcat(msg, tmp1);
-			flag = 1;
-		}
-    }
-}
-
-int change_to_num(char msg[], int *number)// return -1: not number    return 0: is number
-{
-    int l = strlen(msg), flag = 1;
-    char tmp[l + 5];
-    strcpy(tmp, msg);
-    int num = 0, i;
-    for(i = 0; i < l; i++){
-        if(i == 0 && tmp[i] == '-')flag = -1;
-        else if(tmp[i] >= '0' && tmp[i] <= '9'){
-            num *= 10;
-            num += tmp[i] - 48;
-        }else if(i != l - 1 || tmp[i] != ':')return -1;
-    }
-    *number = num * flag;
-    return 0;
-}
-
 void action(int x, int num, int fd)//1:check  2:call  3:raise num  4:all_in  5:fold
 {
     char action_msg[25] = {0};
@@ -104,7 +41,7 @@ void action(int x, int num, int fd)//1:check  2:call  3:raise num  4:all_in  5:f
     write(fd, action_msg, sizeof(action_msg));
 }
 
-void reg(int num, int fd)
+void reg(int num, int fd, char* name_and_notify)
 {
 	char msg[50] = {0};
 	char num1[10] = {0};
@@ -117,7 +54,7 @@ void reg(int num, int fd)
     strrev(num1);
     strcpy(msg, "reg: ");
     strcat(msg, num1);
-    strcat(msg, " hudebudeliao need_notify \n");
+    strcat(msg, name_and_notify);
     write(fd, msg, sizeof(msg));
 
    // reg: pid pname need_notify eol
@@ -385,7 +322,6 @@ int main(int argc, char* agrv[]) {
 	if (fd != -1) printf("Connection established.\n");
 	else {  printf("Connection failure. Program Abort.\n"); return 1;}
 
-	reg(id, fd);
 
 	my.pid = id;
 	my.jetton = START_JETTON;
@@ -517,8 +453,8 @@ int main(int argc, char* agrv[]) {
 						}
 					}
 					uplim = get_uplim(winrate, my.jetton);
-					if(uplim > /*sth.*/){
-						action(RAISE, /*snum.*/, fd);
+					if(uplim > ){
+						action(RAISE, /*snum., fd);
 					}else{
 						if(needcall == 0)action(CHECK, 0, fd);
 						else{
