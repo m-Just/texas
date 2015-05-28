@@ -293,7 +293,7 @@ void pre_action(int x, int *stage, int *stagenum, int round)
 	
 	if(x == SEAT_MSG && round == 0){
 		memset(opp, 0, sizeof(opp));
-		int i = 1;
+		int i = 0;
 		opp[i].pid = button.pid;
 		i++;
 		opp[i].pid = sblind.pid;
