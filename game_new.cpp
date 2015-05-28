@@ -296,6 +296,78 @@ int get_uplim(double winrate, int jet, int mybet)
 	//tmp*r*para = - n*r*para + n
 	//tmp*r*para / (1 - r*para) = n
 }
+
+
+int get_handnut()
+{
+	Card7 get_handnut;
+	int size = -1;
+	for(int i = 1; i <= hold[0]; i++){
+		size++;
+		get_handnut.card[size].color = colorof(hold[i]);
+		get_handnut.card[size].val = pointof(hold[i]);
+	}
+	for(int i = 1; i <= 5; i++){
+		size++;
+		int tmp = com[i];
+		if(i > com[0])tmp = 0;
+		get_handnut.card[size].color = colorof(tmp);
+		get_handnut.card[size].val = pointof(tmp);
+	}
+	get_handnut.get_level();
+	return get_handnut.level;
+}
+
+struct getraise
+{
+	int pid, up;
+};
+
+bool cmp(getraise a, getraise b)
+{
+	return a.up < b.up;
+}
+
+int get_raise(int stage, int stagenum, int round, int nowbet, int mostbet)
+{
+	int follow = 0, f = 0, upfol;
+	getraise ret[10];
+	ret[0].pid = 0;
+	for(int i = 1; i <= done[0].pid; i++){
+		if(done[i].pid == bblind.pid)f = 1;
+		if(f == 0 || stagenum > 1){
+			if(done[i].pid != my.pid){
+				upfol = estFold(done[i].pid, com, com[0], stage, round);
+			}
+		}else{
+			if(stage > 2)upfol = estFold(done[i].pid, com, stage + 1, stage - 1, round);
+			else upfol = 0;
+		}
+		if(upfol == 0)upfol = leastraise + nowbet;
+		if(upfol == -1)upfol = 2147483647;
+		ret[0].pid++;
+		ret[ret[0].pid].up = upfol;
+		ret[ret[0].pid].pid = done[i].pid;
+	}
+	int maxn = 0, ans = 0;
+	sort(ret + 1, ret + 1 + ret[0].pid, cmp);
+	for(int i = 1; i <= ret[0].pid; i++){
+		if(ret[i].up < leastraise + nowbet)continue;	
+		if(ret[i].up == 2147483647)break;
+		int id, tmp = 0;
+		for(int j = i; j <= ret[0].pid; j++){
+			for(int k = 1; k <= done[0].pid; k++)
+				if(done[k].pid == ret[i].pid){
+					id = k; break;
+				}
+			tmp += ret[i].up - done[id],bet;
+		}
+		if(tmp > maxn)maxn = tmp, ans = ret[i].up - nowbet;
+	}
+	if(maxn < ans * (plnum / 4))ans = 0;
+	if(ans + nowbet > mostbet)ans = mostbet - nowbet;
+	return ans;
+}
 //main logic part--------------------------------------------------------------
 
 //before action--------------------------------------------------------------------
@@ -419,19 +491,16 @@ int main(int argc, char* agrv[]) {
 			if (x == POT_MSG) break;
 
 			//action
-			/* if(x == INQUIRE_MSG){
+			if(x == INQUIRE_MSG){
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
 				if(done[1].bet > mybet)needcall = 1;
 				int stage = 1;
 				if(com[0] > 0)stage += com[0] - 2;
 				double winrate;
 				if(stage == 1){//before flop
-					if(hold[0] == 0)winrate = 1.0/(double)plnum;
-					else{
-						Card pubc[6], handc[3];
-						change_to_Card(pubc, handc, hold, com);
-					 	winrate = win_rate(handc, pubc, com[0], plnum).second;	
-					}
+					Card pubc[6], handc[3];
+					change_to_Card(pubc, handc, hold, com);
+					winrate = win_rate(handc, pubc, com[0], plnum).second;	
 					uplim = get_uplim(winrate, my.jetton, mybet);
 					if(needcall == 0)action(CHECK, 0, fd);
 					else{
@@ -446,24 +515,33 @@ int main(int argc, char* agrv[]) {
 					change_to_Card(pubc, handc);
 					winrate = win_rate(handc, pubc, com[0], plnum).second;
 					rel_winrate = winrate;
-					int hold_poker = //get_level(...);  present nut hand
+					int hold_poker = get_handnut();//present nut hand
 					for(i = 1; i <= done[0].pid; i++){
 						if(done[i].pid == bblind.pid)f = 1;
 						int tmp = -1;
-						if(f == 0)tmp = estHand(done[i].pid, com, com[0], stage, round);
-						if(f == 1){
+						if(f == 0 || stagenum > 1)tmp = estHand(done[i].pid, com, com[0], stage, round);
+						else{
 							if(stage > 2)tmp = estHand(done[i].pid, com, com[0], stage - 1, round);
 						}
 						if(tmp != -1 && tmp != 0){
-							rel_winrate *= (1 + (0.1 * (hold_poker - tmp - 1)));
+							rel_winrate *= (1 + (0.1 * (hold_poker - tmp)));
 						}
 					}
 					double ret = 1.0;
 					for(int i = 1; i <= 8 - plnum; i++)ret *= 0.9;
-					ret_winrate *= ret;
 					uplim = get_uplim(rel_winrate, my.jetton, mybet);
-					if(uplim > ){
-						action(RAISE, /*snum., fd);
+					if(rel_winrate * ret > 0.35){
+						int tmp = my.jetton / 4;
+						if(uplim < tmp)tmp = uplim;
+						int upraise = get_raise(stage, stagenum, round, done[1].bet, tmp);
+						if(upraise >= leastraise)action(RAISE, upraise, fd);
+						else{
+							if(needcall == 0)action(CHECK, 0, fd);
+							else{
+								if(done[1].bet > uplim)action(FOLD, 0, fd);
+								else action(CALL, 0, fd);
+							}
+						}
 					}else{
 						if(needcall == 0)action(CHECK, 0, fd);
 						else{
@@ -472,8 +550,7 @@ int main(int argc, char* agrv[]) {
 						}
 					}
 				}
-			}*/
-			
+			}
 		}
 	}
 
