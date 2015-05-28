@@ -44,6 +44,7 @@ struct rate
 rate operator +(const rate &rx1, const rate &rx2);
 rate dfs(bool flag[][14], const Card hand_card[], Card public_card[], const int &public_card_number, const int &player_number);
 rate win_rate(const Card hand_card[], Card public_card[], const int &public_card_number, const int &player_number);
+rate win_rate(const int hand_card[], int public_card[], const int &public_card_number, const int &player_number);
 rate make_pair(double x1, double x2);
 
 void print_Card(Card card[], int num, char * card_type);

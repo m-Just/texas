@@ -15,4 +15,6 @@ int establishConnection(char* serverName, unsigned short serverPort, char* hostN
 
 void disconnect(int s);
 
+void get_word(char msg[], int fd);
+
 #endif

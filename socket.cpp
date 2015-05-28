@@ -6,6 +6,7 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <time.h>
+#include <string.h>
 
 int establishConnection(char* serverName, unsigned short serverPort, char* hostName, unsigned short hostPort) {
 	int s, connected = 0, opt;
@@ -42,4 +43,30 @@ int establishConnection(char* serverName, unsigned short serverPort, char* hostN
 
 void disconnect(int s) {
 	close(s);
+}
+
+void get_word(char msg[], int fd)
+{
+	char tmp[2];
+	int flag = 0;
+	msg[0] = 0;
+	while (1){
+		while (read(fd, tmp, sizeof(tmp[0])) == 0)
+		{
+			usleep(1000 * 5);
+			printf("Nothing in socket for read!\n");
+		}
+		;
+		if (tmp[0] == ' ' || tmp[0] == '\n'){
+			if (flag == 1){
+				break;
+			}
+		}
+		else{
+			char tmp1[2] = { 0, 0 };
+			tmp1[0] = tmp[0];
+			strcat(msg, tmp1);
+			flag = 1;
+		}
+	}
 }

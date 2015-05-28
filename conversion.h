@@ -11,4 +11,8 @@ int pointof(int n) ;
 
 void change_to_Card(Card pubc[], Card handc[], int *hold, int *com); 
 
+int change_to_num(char msg[], int *number);// return -1: not number    return 0: is number
+
+char * strrev(char *str);
+
 #endif
