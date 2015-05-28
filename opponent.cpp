@@ -20,7 +20,7 @@ int hash(int id) {
 }
 
 void iterate(double* value, double change, int roundNum) {
-	*value = (*value * roundNum+1 + change) / (double)(roundNum+2);
+	*value = (*value * roundNum + change) / (double)(roundNum+1);
 }
 
 double coco(int* x, int* y, int ini_i, int steplen, int stepsize, int totallen) { // Correlation Coefficient (0~1)
