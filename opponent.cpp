@@ -24,7 +24,6 @@ void iterate(double* value, double change, int roundNum) {
 }
 
 double coco(int* x, int* y, int ini_i, int steplen, int stepsize, int totallen) { // Correlation Coefficient (0~1)
-	// assuming steplen = 20, stepsize = 10
 	int i, j, cnt = 0, yistmp = 0;
 	if (totallen < steplen + stepsize) return 1;
 	if (y == NULL) {
