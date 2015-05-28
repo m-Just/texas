@@ -390,7 +390,7 @@ int main(int argc, char* agrv[]) {
 					double rel_winrate;
 					Card pubc[6], handc[3];
 					change_to_Card(pubc, handc);
-					winrate = win_rate(handc, pubc, com[0], plnum);
+					winrate = win_rate(handc, pubc, com[0], plnum).second;
 					rel_winrate = winrate;
 					int hold_poker = //get_level(...);  present nut hand
 					for(i = 1; i <= done[0].pid; i++){
