@@ -13,21 +13,11 @@
 
 extern ANAOPP opp[];
 
-<<<<<<< HEAD
 struct player
 {
 	int pid, jetton, money;
 }button, sblind, bblind, nor[10], my;//nor[0].pid is the number of other players.
 //nor: other players.
-=======
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/new
-
-<<<<<<< HEAD
-
->>>>>>> origin/new
 
 int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 {
@@ -76,6 +66,27 @@ struct pot_win
 
 int plnum = 0; //player number
 int pot = 0;
+
+void Mate1Action(int round)
+{
+#ifdef TEST
+	double avrg = 0;
+	rate R;
+	if (com[0] >= 3) R = win_rate(hold + 1, com + 1, com[0], plnum); else R = make_pair(0.125, 0);
+	double win = R.second;
+	int maxbet = 0;
+	for (int i = 0; i < 8; i++)
+	{
+		avrg += opp[i].avrgBet * (opp[i].jetton[round - 1] + opp[i].money[round - 1]);
+		maxbet = max(maxbet, opp[i].lastbet[round]);
+		if (round > 0)printf("round: %d id: %d money: %d jetton: %d average bet: %lf last bet: %d\n", round - 1, opp[i].pid, opp[i].money[round - 1], opp[i].jetton[round - 1], opp[i].avrgBet, opp[i].lastbet[round - 1]);
+	}
+	printf("\n");
+	avrg /= 28000;
+	int mebet = (int)(avrg * win * AVGC);
+	if (round < 10 || maxbet > mebet) action(FOLD, 0, fd); else action(RAISE, (int)(mebet - maxbet), fd);
+#endif
+}
 
 int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:common cards  7:showdown  8:pot-win  9:notify
 {
@@ -490,11 +501,9 @@ int main(int argc, char* agrv[]) {
 				}
 				break;
 			}
-=======
 			pre_action(x, &stage, &stagenum, round);
-			if(x == POT_MSG)break;
->>>>>>> origin/new
-			
+			if (x == POT_MSG) continue;
+			if (x == INQUIRE_MSG) Mate1Action(round);
 			//action
 			/* if(x == INQUIRE_MSG){
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
