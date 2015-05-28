@@ -17,4 +17,8 @@ void disconnect(int s);
 
 void get_word(char msg[], int fd);
 
+void action(int x, int num, int fd);//1:check  2:call  3:raise num  4:all_in  5:fold
+
+void reg(int num, int fd, char* name_and_notify);
+
 #endif
