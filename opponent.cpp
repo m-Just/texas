@@ -1,5 +1,6 @@
 #include "opponent.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "constant.h"
 #include "conversion.h"
