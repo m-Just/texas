@@ -94,3 +94,11 @@ rate win_rate(const Card hand_card[], Card public_card[], const int &public_card
 	return dfs(flag, hand_card, public_card, public_card_number, player_number);
 	
 }
+
+rate win_rate(const int hand_card[], int public_card[], const int &public_card_number, const int &player_number)
+{
+	Card hold[2], com[10];
+	for (int i = 0; i < 2; i++) hold[i] = int2card(hand_card[i]);
+	for (int i = 0; i < public_card_number; i++) com[i] = int2card(public_card[i]);
+	return win_rate(hold, com, public_card_number, player_number);
+}
