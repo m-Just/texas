@@ -263,7 +263,7 @@ int main(int argc, char* agrv[]) {
 #endif
 
 #ifdef TEST
-	printf("%d\n", time(0));
+	printf("%ld\n", time(0));
 	Card hand_card[2], common_card[7];
 #endif
 
@@ -298,21 +298,7 @@ int main(int argc, char* agrv[]) {
 				disconnect(fd);
 				return 0;
 			}
-
-#ifdef TEST_RATE
-			if (x == COM_CARDS_MSG && com[0] >= 3)
-			{
-				for (int i = 0; i < hold[0]; i++) hand_card[i] = int2card(hold[i + 1]);
-				for (int i = 0; i < com[0]; i++) common_card[i] = int2card(com[i + 1]);
-				rate win_and_draw = win_rate(hand_card, common_card, com[0], plnum);
-				printf("/****************************/\n");
-				printf("player alive:%d\n", plnum);
-				print_Card(hand_card, hold[0], "hand card");
-				print_Card(common_card, com[0], "common card");
-				printf("\nwin_rate: %lf, draw_rate: %lf\n", win_and_draw.second, win_and_draw.first);
-				printf("/****************************/\n");
-			}
-#endif			
+	
 			//pre action
 			if (x == SEAT_MSG && round == 0){
 				memset(opp, 0, sizeof(opp));
@@ -358,15 +344,17 @@ int main(int argc, char* agrv[]) {
 				rate R;
 				if (com[0] >= 3) R = win_rate(hold + 1, com + 1, com[0], plnum); else R = make_pair(0.125, 0);
 				double win = R.second;
-				for (int i = 0; i < 7; i++)
+				int maxbet = 0;
+				for (int i = 0; i < 8; i++)
 				{
 					avrg += opp[i].avrgBet * (opp[i].jetton[round] + opp[i].money[round]);
-					printf("round: %d id: %d money: %d jetton: %d average bet: %lf\n", round, opp[i].pid, opp[i].money[round], opp[i].jetton[round], opp[i].avrgBet);
+					maxbet = max(maxbet, opp[i].lastbet[round]);
+					printf("round: %d id: %d money: %d jetton: %d average bet: %lf last bet: %d\n", round, opp[i].pid, opp[i].money[round], opp[i].jetton[round], opp[i].avrgBet, opp[i].lastbet[round]);
 				}
 				printf("\n");
 				avrg /= 28000;
 				int mebet = (int)(avrg * win * AVGC);
-				if (maxbet > mebet) action(FOLD, 0, fd); else action(RAISE, (int)(mebet - maxbet), fd);
+				if (round < 10 || maxbet > mebet) action(FOLD, 0, fd); else action(RAISE, (int)(mebet - maxbet), fd);
 #endif
 			}
 			if (x == SHOW_MSG){
@@ -378,8 +366,9 @@ int main(int argc, char* agrv[]) {
 			if (x == POT_MSG){
 				int i;
 				for (i = 1; i <= win[0].pid; i++){
-					updateData(win[i].pid, POT, win[i].num, -1, -1, POT_WIN, round);
+					//updateData(win[i].pid, POT, win[i].num, -1, -1, POT_WIN, round);
 				}
+				break;
 			}
 		}
 	}

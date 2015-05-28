@@ -217,7 +217,7 @@ int estHand(int id, int* card, int cardNum, int stage, int roundNum) { // estima
 int estFold(int id, int* card, int cardNum, int stage, int roundNum) { // return the estimated amount of bet that would force the opponent's to fold
 	int i = hash(id);
 	int eHand = estHand(id, card, cardNum, stage, roundNum);       // the return value
-	if (opp[i].foldrate < 0.2 && opp[i].style == LOOSE) return 0;
+	if (opp[i].foldrate < 0.2 && opp[i].style == LOOSE) return -1;
 	if (opp[i].foldrate > 0.8 && opp[i].style == TIGHT) return opp[i].avrgBet*pow(2, eHand-1);
 	if (stage > PREFLOP && stage <= RIVER && eHand > UNKNOWN && opp[i].maxbet[eHand])
 		return rnd(jettonPara(id, stage, roundNum, opp[i].maxbetRound[eHand])*opp[i].maxbet[eHand]/opp[i].foldrate);

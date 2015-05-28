@@ -5,9 +5,12 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
+#include<stdlib.h>
+#include "conversion.h"
 
 int establishConnection(char* serverName, unsigned short serverPort, char* hostName, unsigned short hostPort) {
 	int s, connected = 0, opt;
@@ -120,4 +123,11 @@ void reg(int num, int fd, char* name_and_notify)
 	write(fd, msg, sizeof(msg));
 
 	// reg: pid pname need_notify eol
+}
+
+int socket_get_int(int fd)
+{
+	char msg[10];
+	get_word(msg, fd);
+	return atoi(msg);
 }
