@@ -1,4 +1,4 @@
-**this file records all new importaupdates, please keep it clean and up-to-date**  
+**this file records all new important updates, please keep it clean and up-to-date**  
 **Please edit and show your udpates at the top**  
   
 
