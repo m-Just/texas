@@ -13,22 +13,6 @@
 
 extern ANAOPP opp[];
 
-<<<<<<< HEAD
-struct player
-{
-	int pid, jetton, money;
-}button, sblind, bblind, nor[10], my;//nor[0].pid is the number of other players.
-//nor: other players.
-=======
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/new
-
-<<<<<<< HEAD
-
->>>>>>> origin/new
-
 int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 {
 	char* serverName;
@@ -411,90 +395,9 @@ int main(int argc, char* agrv[]) {
 			}
 					
 			//pre action
-<<<<<<< HEAD
-			if(x == SEAT_MSG && round == 0){
-				memset(opp, 0, sizeof(opp));
-				int i = 0;
-				opp[i].pid = button.pid;
-				i++;
-				opp[i].pid = sblind.pid;
-				i++;
-				if(plnum > 2)opp[i].pid = bblind.pid, i++;
-				int j;
-				for(j = 1; j <= nor[0].pid; j++){
-					opp[i].pid = nor[j].pid;
-					i++;
-				}
-			}
-			if(x == SEAT_MSG){
-				int i;
-				i = hash(button.pid);
-				opp[i].money[round] = button.money;
-				opp[i].jetton[round] = button.jetton;
-				
-				i = hash(sblind.pid);
-				opp[i].money[round] = sblind.money;
-				opp[i].jetton[round] = sblind.jetton;
-				
-				if(plnum > 2){
-					i = hash(bblind.pid);
-					opp[i].money[round] = bblind.money;
-					opp[i].jetton[round] = bblind.jetton;
-				}
-				for(int j = 1; j <= nor[0].pid; j++){
-					i = hash(nor[j].pid);
-					opp[i].money[round] = nor[j].money;
-					opp[i].jetton[round] = nor[j].jetton;
-				}
-			}
-			if(x == INQUIRE_MSG || x == NOTIFY_MSG){
-				int i;
-				int stage = 1, f = 0;
-				if(com[0] > 0)stage += com[0] - 2;
-				for(i = 1; i <= done[0].pid; i++){
-					if(done[i].pid == my.pid){
-						my.jetton = done[i].jetton;
-						my.money = done[i].money;
-						mybet = done[i].bet;
-					}
-					if(done[i].pid == bblind.pid)f = 1;
-					if(f == 0){
-						int bet = 0;
-						if(done[i].action == CHECK || done[i].action == ALLIN || done[i].action == FOLD);
-						else bet = done[i].bet;
-						updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage, round);
-					}
-					if(f == 1){
-						int bet = 0;
-						if(done[i].action == CHECK || done[i].action == ALLIN || done[i].action == FOLD);
-						else bet = done[i].bet;
-						if(stage > 1)updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage - 1, round);
-						else updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage, round);
-					}
-					if(done[i].action == RAISE && done[i].pid != my.pid){
-						if(leastraise < done[i].bet - done[i + 1].bet)
-							leastraise = done[i].bet - done[i + 1].bet;
-					}
-				}
-			}
-			if(x == SHOW_MSG){
-				int i;
-				for(i = 1; i <= rank[0].pid; i++){
-					updateData(rank[i].pid, SHOW, rank[0].nut_hand*10+rank[i].nut_hand, -1, -1, POT_WIN, round);
-				}
-			}
-			if(x == POT_MSG){
-				int i;
-				for(i = 1; i <= win[0].pid; i++){
-					updateData(win[i].pid, POT, win[i].num, -1, -1, POT_WIN, round);
-				}
-				break;
-			}
-=======
 			pre_action(x, &stage, &stagenum, round);
 			if(x == POT_MSG)break;
->>>>>>> origin/new
-			
+
 			//action
 			/* if(x == INQUIRE_MSG){
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
