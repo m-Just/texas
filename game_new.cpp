@@ -416,7 +416,7 @@ int main(int argc, char* agrv[]) {
 			//pre action
 			pre_action(x, &stage, &stagenum, round);
 			if (x == INQUIRE_MSG) Mate1Action(round);
-			if (x == POT_MSG) continue;
+			if (x == POT_MSG) break;
 
 			//action
 			/* if(x == INQUIRE_MSG){
