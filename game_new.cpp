@@ -1,4 +1,4 @@
-int hold[5], com[10];
+int hold[5], com[10], leastraise;
 #include <stdio.h>
 #include <stdlib.h>
 #include "socket.h"
@@ -14,13 +14,11 @@ int hold[5], com[10];
 
 extern ANAOPP opp[];
 
-/*
 struct player
 {
 	int pid, jetton, money;
 }button, sblind, bblind, nor[10], my;//nor[0].pid is the number of other players.
 //nor: other players.
-*/
 
 struct player_in_game
 {
@@ -42,28 +40,44 @@ struct pot_win
 int plnum = 0; //player number
 int pot = 0;
 
-int get_msg(int fd, int round)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:common cards  7:showdown  8:pot-win  9:notify
+int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:common cards  7:showdown  8:pot-win  9:notify
 {
 	char msg[25] = {0};
 	get_word(msg, fd);
 	if(strcmp(msg, "seat/") == 0){
+		nor[0].pid = 0;
 		plnum = 0;
 		while(1){
 			get_word(msg, fd);
 			if(strcmp(msg, "/seat") == 0)return 1;
-			else if (strcmp(msg, "small") == 0 || strcmp(msg, "big") == 0) { IOW; IOW; }
-			else if (strcmp(msg, "button:") == 0) IOW;
-			updateData(hash(atoi(msg)), SEAT, -1, SGI, SGI, SEAT_STAGE, round);
-			plnum++;
+			if(strcmp(msg, "button:") == 0){
+				button.pid = SGI;	button.jetton = SGI;	button.money = SGI;
+				plnum ++;
+			}else if(strcmp(msg, "small") == 0){
+				IOW;
+				sblind.pid = SGI;	sblind.jetton = SGI;	sblind.money = SGI;
+				plnum ++;	
+			}else if(strcmp(msg, "big") == 0){
+				IOW;
+				bblind.pid = SGI;	bblind.jetton = SGI;	bblind.money = SGI;
+				plnum ++;	
+			}else{
+				nor[0].pid ++;
+				int x = nor[0].pid;
+				nor[x].pid = SGI;	nor[x].jetton = SGI;	nor[x].money = SGI;	
+				plnum ++;
+			}
 		}	
 	}
 	if(strcmp(msg, "game-over") == 0)return 2;
 	if(strcmp(msg, "blind/") == 0){
 		int num = 0;
-		opp[hash(SGI)].jetton[round] -= SGI;
-		if (plnum > 2) opp[hash(SGI)].jetton[round] -= SGI;
-		IOW;
-		return 3;
+		IOW; sblind.jetton -= SGI;
+		while(1){
+			get_word(msg, fd);
+			if(strcmp(msg, "/blind") == 0)return 3;
+			else bblind.jetton -= SGI;
+		}
 	}
 	if(strcmp(msg, "hold/") == 0){
 		char col[10];
@@ -197,14 +211,34 @@ int get_uplim(double winrate, int jet, int mybet)
 {
 	int tmp = pot - mybet, f = 0;
 	int i;
-	for(i = 1; i <= done[0].pid; i++){
-		if(done[i].pid == bblind.pid)f = 1;
-		if(f == 1 && done[i].pid != my.pid){
-			int x = hash(done[i].pid);
-			if(opp[x].avrgBet[0])tmp += opp[x].avrgBet[0];
-			else tmp += 30;
-		}
+	struct getbet{
+		int pid, bet;
+	}pl[10];
+	memset(pl, 0, sizeof(pl));
+	pl[1].pid = button.pid;
+	pl[2].pid = sblind.pid;
+	pl[0].pid = 2;
+	if(plnum > 2)pl[3].pid = bblind.pid, pl[0].pid = 3;
+	for(i = 1; i <= nor[0].pid; i++){
+		pl[0].pid++;
+		pl[pl[0].pid].pid = nor[i].pid;
 	}
+	for(i = 1; i <= done[0].pid; i++){
+		int id;
+		for(int j = 1; j <= pl[0].pid; j++)
+			if(pl[j].pid == done[i].pid){
+				id = j; break;
+			}
+		pl[id].bet = done[i].bet;
+	}
+	for(i = 1; i <= pl[0].pid; i++){
+		int id = hash(pl[i].pid);
+		if(pl[i].pid != my.pid){
+			if(opp[id].avrgBet){
+				if(pl[i].bet < opp[id].avrgBet)tmp += opp[id].avrgBet - pl[i].bet;
+			}else if(pl[i].bet < BIG_BLIND)tmp += BIG_BLIND - pl[i].bet;
+		}
+	} 
 	double para = 1.0;
 	if((double)jet/START_JETTON < 1.0)para = (double)jet/START_JETTON;
 	int ans = ((double)tmp * winrate * para) / (1.0 - winrate * para) + 0.5;
@@ -258,19 +292,55 @@ int main(int argc, char* agrv[]) {
 	int round, flag = 0, mybet = 0;
 	for (round = 0; round < MAX_ROUND; round++) {
 		mybet = 0;
+		leastraise = BIG_BLIND;
 		hold[0] = 0;
 		com[0] = 0;
 		while(1){
 			//read
-			int x = get_msg(fd, round);
+			int x = get_msg(fd);
 			
 			//quit
 			if(x == GAME_OVER_MSG){
 				disconnect(fd);
 				return 0;
 			}
-					
+			
+#ifdef TEST_RATE
+			if (x == COM_CARDS_MSG && com[0] >= 3)
+			{
+				for (int i = 0; i < hold[0]; i++) hand_card[i] = int2card(hold[i + 1]);
+				for (int i = 0; i < com[0]; i++) common_card[i] = int2card(com[i + 1]);
+				rate win_and_draw = win_rate(hand_card, common_card, com[0], plnum);
+				printf("/****************************/\n");
+				printf("player alive:%d\n", plnum);
+				print_Card(hand_card, hold[0], "hand card");
+				print_Card(common_card, com[0], "common card");
+				printf("\nwin_rate: %lf, draw_rate: %lf\n", win_and_draw.second, win_and_draw.first);
+				printf("/****************************/\n");
+			}
+#endif			
 			//pre action
+			if(x == SEAT_MSG && round == 0){
+				memset(opp, 0, sizeof(opp));
+				int i = 1;
+				opp[i].pid = button.pid;
+				i++;
+				opp[i].pid = sblind.pid;
+				i++;
+				if(plnum > 2)opp[i].pid = bblind.pid, i++;
+				int j;
+				for(j = 1; j <= nor[0].pid; j++){
+					opp[i].pid = nor[j].pid;
+					i++;
+				}
+			}
+			if(x == SEAT_MSG){
+				int i;
+				i = hash(button.pid);
+				opp[i].money[round] = button.money;
+				opp[i].jetton[round] = button.jetton;
+			
+			}
 			if(x == INQUIRE_MSG || x == NOTIFY_MSG){
 				int i;
 				int stage = 1, f = 0;
