@@ -1,5 +1,5 @@
 
-GAME = play_mate_always_average
+GAME = game_new
 
 objects = $(GAME).o opponent.o conversion.o rate.o Card.o socket.o
 

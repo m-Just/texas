@@ -50,5 +50,7 @@ int estHand(int id, int* card, int cardNum, int stage, int roundNum);
 
 int estFold(int id, int* card, int cardNum, int stage, int roundNum);
 
+void oppclear();
+
 
 #endif

@@ -4,8 +4,14 @@
 #include <math.h>
 #include "constant.h"
 #include "conversion.h"
+#include <string.h>
 
 ANAOPP opp[MAX_PLAYER_NUM];
+
+void oppclear()
+{
+	memset(opp, 0, sizeof(opp));
+}
 
 int rnd(double val) {
 	return (int)(val + 0.5);

@@ -63,6 +63,9 @@ void get_word(char msg[], int fd)
 		;
 		if (tmp[0] == ' ' || tmp[0] == '\n'){
 			if (flag == 1){
+#ifdef TEST_GET_WORD
+				printf("%s\n", msg);
+#endif
 				break;
 			}
 		}
