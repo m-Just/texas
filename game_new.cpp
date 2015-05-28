@@ -14,11 +14,6 @@ int hold[5], com[10];
 
 extern ANAOPP opp[MAX_PLAYER_NUM];
 
-	//action(kind, bet number, socket);
-	//get_word(&a_word_name, socket);
-	//change_to_num(a_word_name, &a_number_name);
-
-
 struct player
 {
 	int pid, jetton, money;
@@ -365,7 +360,7 @@ int main(int argc, char* agrv[]) {
 			if(x == POT_MSG){
 				int i;
 				for(i = 1; i <= win[0].pid; i++){
-					updateData(win[i].pid, POT, /*num*//*for test*/0, -1, -1, POT_WIN, round);
+					updateData(win[i].pid, POT, win[i].num, -1, -1, POT_WIN, round);
 				}
 			}
 			

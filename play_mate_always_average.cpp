@@ -8,68 +8,12 @@ int hold[5], com[10];
 #include "Card.h"
 #include<string.h>
 
+#define AVGC 2
 #ifdef TEST
 #include <time.h>
 #endif
 
-#define AVGC 2
-
 extern ANAOPP opp[MAX_PLAYER_NUM];
-
-void action(int x, int num, int fd)//1:check  2:call  3:raise num  4:all_in  5:fold
-{
-	char action_msg[25] = { 0 };
-	if (x == CHECK){
-		strcpy(action_msg, "check \n");
-	}
-	else if (x == CALL){
-		strcpy(action_msg, "call \n");
-	}
-	else if (x == RAISE){
-		char num1[10] = { 0 };
-		while (num > 0){
-			int ret = num % 10;
-			char tmp[2] = { 0 }; tmp[0] = ret + 48;
-			strcat(num1, tmp);
-			num /= 10;
-		}
-		strrev(num1);
-		strcpy(action_msg, "raise ");
-		strcat(action_msg, num1);
-		strcat(action_msg, " \n");
-	}
-	else if (x == ALLIN){
-		strcpy(action_msg, "all_in \n");
-	}
-	else if (x == FOLD){
-		strcpy(action_msg, "fold \n");
-	}
-	write(fd, action_msg, sizeof(action_msg));
-}
-
-void reg(int num, int fd, char* name_and_notify)
-{
-	char msg[50] = { 0 };
-	char num1[10] = { 0 };
-	while (num > 0){
-		int ret = num % 10;
-		char tmp[2] = { 0 }; tmp[0] = ret + 48;
-		strcat(num1, tmp);
-		num /= 10;
-	}
-	strrev(num1);
-	strcpy(msg, "reg: ");
-	strcat(msg, num1);
-	strcat(msg, name_and_notify);
-	write(fd, msg, sizeof(msg));
-
-	// reg: pid pname need_notify eol
-}
-
-//action(kind, bet number, socket);
-//get_word(&a_word_name, socket);
-//change_to_num(a_word_name, &a_number_name);
-
 
 struct player
 {
@@ -333,7 +277,7 @@ int main(int argc, char* agrv[]) {
 	if (fd != -1) printf("Connection established.\n");
 	else { printf("Connection failure. Program Abort.\n"); return 1; }
 
-	reg(id, fd, "always_average need notify\n");
+	reg(id, fd, "hdbdl need notify \n");
 
 	my.pid = id;
 	my.jetton = START_JETTON;
@@ -354,8 +298,23 @@ int main(int argc, char* agrv[]) {
 				disconnect(fd);
 				return 0;
 			}
+
+#ifdef TEST_RATE
+			if (x == COM_CARDS_MSG && com[0] >= 3)
+			{
+				for (int i = 0; i < hold[0]; i++) hand_card[i] = int2card(hold[i + 1]);
+				for (int i = 0; i < com[0]; i++) common_card[i] = int2card(com[i + 1]);
+				rate win_and_draw = win_rate(hand_card, common_card, com[0], plnum);
+				printf("/****************************/\n");
+				printf("player alive:%d\n", plnum);
+				print_Card(hand_card, hold[0], "hand card");
+				print_Card(common_card, com[0], "common card");
+				printf("\nwin_rate: %lf, draw_rate: %lf\n", win_and_draw.second, win_and_draw.first);
+				printf("/****************************/\n");
+			}
+#endif			
 			//pre action
-			if (x == SEAT_MSG){
+			if (x == SEAT_MSG && round == 0){
 				memset(opp, 0, sizeof(opp));
 				int i = 1;
 				opp[i].pid = button.pid;
@@ -372,10 +331,8 @@ int main(int argc, char* agrv[]) {
 			if (x == INQUIRE_MSG || x == NOTIFY_MSG){
 				int i;
 				int stage = 1, f = 0;
-				int maxbet = 0;
 				if (com[0] > 0)stage += com[0] - 2;
 				for (i = 1; i <= done[0].pid; i++){
-					maxbet = done[i].bet > maxbet ? done[i].bet : maxbet;
 					if (done[i].pid == my.pid){
 						my.jetton = done[i].jetton;
 						my.money = done[i].money;
@@ -408,8 +365,6 @@ int main(int argc, char* agrv[]) {
 				}
 				printf("\n");
 				avrg /= 28000;
-				//printf("draw:%lf win:%lf avrg:%lf\n", R.first, R.second, avrg);
-				
 				int mebet = (int)(avrg * win * AVGC);
 				if (maxbet > mebet) action(FOLD, 0, fd); else action(RAISE, (int)(mebet - maxbet), fd);
 #endif
@@ -423,12 +378,10 @@ int main(int argc, char* agrv[]) {
 			if (x == POT_MSG){
 				int i;
 				for (i = 1; i <= win[0].pid; i++){
-					updateData(win[i].pid, POT, /*num*//*for test*/0, -1, -1, POT_WIN, round);
+					updateData(win[i].pid, POT, win[i].num, -1, -1, POT_WIN, round);
 				}
-				break;
 			}
-
-}
+		}
 	}
 
 #ifdef WRITE_IN_FILE
