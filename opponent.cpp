@@ -127,7 +127,6 @@ void compute(int roundNum)
 #endif
 	for (int i = 0; i < 8; i++) if (opp[i].money > 0)
 	{
-<<<<<<< HEAD
 		int k = RIVER - 1;
 		while (k > 0 && opp[i].bet[roundNum][k] == 0) k--;
 		double lastbet = opp[i].bet[roundNum][k];
@@ -136,15 +135,7 @@ void compute(int roundNum)
 		iterate(&opp[i].variance, pow(lastbet - opp[i].avrgBet, 2.0), roundNum);
 		//fprintf(fout, "round: %d id: %d lastbet: %d average: %lf variance: %lf\n", roundNum, opp[i].pid, (int)lastbet, opp[i].avrgBet, opp[i].variance);
 #ifdef TEST		
-=======
-		iterate(&opp[i].avrgBet,  (double)opp[i].lastbet[roundNum], roundNum);
-		iterate(&opp[i].variance, pow(opp[i].lastbet[roundNum] - opp[i].avrgBet, 2.0), roundNum);
 		iterate(&opp[i].foldrate, (double)(opp[i].currentAction==FOLD), roundNum);
-		fprintf(fout, "round: %d id: %d lastbet: %d average: %lf variance: %lf\n", roundNum, opp[i].pid, opp[i].lastbet[roundNum], opp[i].avrgBet, opp[i].variance);
->>>>>>> origin/new
-		fprintf(fout, "round: %6d player:%6d", roundNum, opp[i].pid);
-		for (int j = 0; j < RIVER; j++) fprintf(fout, "%7d ", opp[i].bet[roundNum][j]);
-		fprintf(fout, "\n");
 #endif
 	}
 #ifdef TEST
