@@ -69,8 +69,12 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	// ESPECIALLY, input the poker hands into "num" for SHOW action.
 	// otherwise, input 0 if not available.	
 #ifdef TEST
+<<<<<<< HEAD
 	FILE *fout = fopen("update.txt", "a");
 	fprintf(fout, "id: %7d action: %7d num: %7d stage: %7d roundNum: %7d\n", id, action, num, stage, roundNum);
+=======
+	FILE *fout = fopen("opponent.txt", "a");
+>>>>>>> origin/new
 #endif
 	int i = hash(id); int j;
 	opp[i].currentAction = action;
@@ -106,17 +110,16 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	
 	if (opp[i].maxbet[0] < *b) { opp[i].maxbet[0] = *b; opp[i].maxbetRound[0] = roundNum; }
 
-	/*
 	if (action == FOLD || action == SHOW ) {  // the errors of the values below are big when roundNum is small
 		opp[i].lastbet[roundNum] = *b;
 		opp[i].cc = coco(opp[i].lastbet, opp[i].jetton, 0, 20, 10, roundNum);
 		iterate(&opp[i].avrgBet,  (double)*b, roundNum);
-#ifdef TEST
-		fprintf(fout, "round %d player%d : bet:%d\n", roundNum, opp[i].pid, *b);
-#endif
 		iterate(&opp[i].variance, pow((double)(*b-opp[i].avrgBet), 2.0), roundNum);
-		iterate(&opp[i].foldrate, (double)(action%SHOW)/FOLD, roundNum);
-	}*/
+		iterate(&opp[i].foldrate, (double)(action==FOLD), roundNum);
+#ifdef TEST
+		fprintf(fout, "round %d player%d : bet:%d abet:%f var:%f foldrate:%f\n", roundNum, opp[i].pid, *b, opp[i].avrgBet, opp[i].variance, opp[i].foldrate);
+#endif
+	}
 	
 	if (roundNum > 0 && !(roundNum%10) && opp[i].style != BLUFF) {
 		if 	(opp[i].avrgBet < 2*BIG_BLIND) opp[i].style = TIGHT;
@@ -183,6 +186,9 @@ double jettonPara(int id, int stage, int roundNum, int maxbetRnd) {
 // the "card" and "cardNum" is only the values of public cards
 int estHand(int id, int* card, int cardNum, int stage, int roundNum) { // estimating the most possible poker hand the opponent's got
 	// by study the opponent's possible hands and pattern of actions(style).
+#ifdef TEST
+	FILE *fout = fopen("opponent.txt", "a");
+#endif
 	int i = hash(id);
 	int b = opp[i].bet[roundNum][stage-1];
 
@@ -220,10 +226,15 @@ int estHand(int id, int* card, int cardNum, int stage, int roundNum) { // estima
 		for (m = 0; m < cnt-3; m++) if (p[m+3]-p[m] < 5) potentHand  = STRAIGHT_FLUSH;
 	}
 	
+#ifdef TEST
+		fprintf(fout, "round %d player%d : lowest:%d potent:%d highest:%d\n", roundNum, opp[i].pid, lowestHand, potentHand, highestHand);
+#endif
 	double betcchand = 0; int cnt = 0;
 	for (m = 1; m < 10; m++) if (opp[i].maxbet[m]) cnt++;
 	if (cnt > 2) betcchand = coco(opp[i].maxbet, NULL, 1, 1, 1, 9);
-
+#ifdef TEST
+	if (fabs(betcchand)>1) { fprintf(fout, "Invalid value of betcchand: %lf, setting to default value 0.\n", betcchand); betcchand = 0; }
+#endif
 	/* main logic */  // the logic concerning decision making and bluff-playing needs to be improved
 	if (opp[i].currentAction == CHECK || opp[i].currentAction == FOLD) { 
 		if (opp[i].maxbet[lowestHand] < opp[i].bet[roundNum][stage-1]) {
@@ -248,16 +259,27 @@ int estHand(int id, int* card, int cardNum, int stage, int roundNum) { // estima
 		if (opp[i].style == BLUFF) return potentHand;
 		else 			   return potentHand+(potentHand != STRAIGHT_FLUSH);
 	} else return UNKNOWN;
-	
+#ifdef TEST
+	fclose(fout);
+#endif
 }		
 
 // note: estimation is not available before the stage of FLOP
 int estFold(int id, int* card, int cardNum, int stage, int roundNum) { // return the estimated amount of bet that would force the opponent's to fold
+#ifdef TEST
+	FILE* fout = fopen("opponent.txt", "a");
+#endif
 	int i = hash(id);
 	int eHand = estHand(id, card, cardNum, stage, roundNum);       // the return value
+#ifdef TEST
+	fprintf(fout, "Estimated hand#%d of player#%d at stage#%d in round#%d\n", eHand, id, stage, roundNum);
+#endif
 	if (opp[i].foldrate < 0.2 && opp[i].style == LOOSE) return -1;
 	if (opp[i].foldrate > 0.8 && opp[i].style == TIGHT) return opp[i].avrgBet*pow(eHand+1, 2);
 	if (stage > PREFLOP && stage <= RIVER && eHand > UNKNOWN && opp[i].maxbet[eHand])
 		return rnd(jettonPara(id, stage, roundNum, opp[i].maxbetRound[eHand])*opp[i].maxbet[eHand]/opp[i].foldrate);
 	else 	return 0;
+#ifdef TEST
+	fclose(fout);
+#endif
 }
