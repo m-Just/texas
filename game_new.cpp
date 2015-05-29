@@ -516,6 +516,7 @@ int main(int argc, char* agrv[]) {
 			if(x == INQUIRE_MSG){
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
 				if(done[1].bet > mybet)needcall = 1;
+				else needcall = 0;
 				double winrate;
 				if(stage == 1){//before flop
 					winrate = pre_flop_rate[1][plnum][hold[1]][hold[2]];	
