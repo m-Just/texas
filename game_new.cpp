@@ -520,7 +520,7 @@ int main(int argc, char* agrv[]) {
 					if(needcall == 0)action(CHECK, 0, fd);
 					else{
 						if(done[1].bet > uplim)action(FOLD, 0, fd);
-						else action(CALL, 0, fd);
+						else action(CALL, 0, fd), mybet = done[1].bet;
 					}
 				}
 				if(stage >= 2){
@@ -549,19 +549,19 @@ int main(int argc, char* agrv[]) {
 						int tmp = my.jetton / 4;
 						if(uplim < tmp)tmp = uplim;
 						int upraise = get_raise(stage, stagenum, round, done[1].bet, tmp);
-						if(upraise >= leastraise)action(RAISE, upraise, fd);
+						if(upraise >= leastraise)action(RAISE, upraise, fd), leastraise = upraise, mybet = done[1].bet + upraise;
 						else{
 							if(needcall == 0)action(CHECK, 0, fd);
 							else{
 								if(done[1].bet > uplim)action(FOLD, 0, fd);
-								else action(CALL, 0, fd);
+								else action(CALL, 0, fd), mybet = done[1].bet;
 							}
 						}
 					}else{
 						if(needcall == 0)action(CHECK, 0, fd);
 						else{
 							if(done[1].bet > uplim)action(FOLD, 0, fd);
-							else action(CALL, 0, fd);
+							else action(CALL, 0, fd), mybet = done[1].bet;
 						}
 					}
 				}
