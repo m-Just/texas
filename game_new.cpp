@@ -526,7 +526,9 @@ int main(int argc, char* agrv[]) {
 							if(stage > 2)tmp = estHand(done[i].pid, com, com[0], stage - 1, round);
 						}
 						if(tmp != -1 && tmp != 0){
-							rel_winrate *= (1 + (0.1 * (hold_poker - tmp)));
+							double pos = 0.1;
+							if(hold_poker < tmp)pos = -0.1;
+							rel_winrate *= (1 + (0.2 * (hold_poker - tmp) - pos));
 						}
 					}
 					double ret = 1.0;
