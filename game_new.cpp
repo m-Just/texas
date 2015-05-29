@@ -515,9 +515,7 @@ int main(int argc, char* agrv[]) {
 				if(done[1].bet > mybet)needcall = 1;
 				double winrate;
 				if(stage == 1){//before flop
-					Card pubc[6], handc[3];
-					change_to_Card(pubc, handc, hold, com);
-					winrate = win_rate(handc, pubc, com[0], plnum).second;	
+					winrate = pre_flop_rate[1][plnum][hold[1]][hold[2]];	
 					uplim = get_uplim(winrate, my.jetton, mybet);
 					if(needcall == 0)action(CHECK, 0, fd);
 					else{
@@ -528,9 +526,7 @@ int main(int argc, char* agrv[]) {
 				if(stage >= 2){
 					int f = 0;
 					double rel_winrate;
-					Card pubc[6], handc[3];
-					change_to_Card(pubc, handc, hold, com);
-					winrate = win_rate(handc, pubc, com[0], plnum).second;
+					winrate = win_rate(hold, com, com[0], plnum).second;
 					rel_winrate = winrate;
 					int hold_poker = get_handnut();//present nut hand
 					for(i = 1; i <= done[0].pid; i++){
