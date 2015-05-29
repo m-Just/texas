@@ -536,7 +536,7 @@ int main(int argc, char* agrv[]) {
 				if(stage >= 2){
 					int f = 0;
 					double rel_winrate;
-					winrate = win_rate(hold, com, com[0], plnum).second;
+					winrate = win_rate(hold + 1, com + 1, com[0], plnum).second;
 					rel_winrate = winrate;
 					int hold_poker = get_handnut();//present nut hand
 					for(i = 1; i <= done[0].pid; i++){
