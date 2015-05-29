@@ -36,8 +36,15 @@ int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 	if (fd != -1) printf("Connection established.\n");
 	else { printf("Connection failure. Program Abort.\n"); exit(1); }
 
+<<<<<<< HEAD
 	reg(id, fd, "avg_boy need_notify \n");
 	read_pre_flop(pre_flop_rate[1], pre_flop_rate[0]);
+=======
+	char tmp[30];
+	strcpy(tmp, "avg_boy need_notify \n");
+	
+	reg(id, fd, tmp);
+>>>>>>> f7db2980f2b5f974be76adc49dba2ab7046be519
 	return 1;
 }
 
@@ -522,7 +529,7 @@ int main(int argc, char* agrv[]) {
 					int f = 0;
 					double rel_winrate;
 					Card pubc[6], handc[3];
-					change_to_Card(pubc, handc);
+					change_to_Card(pubc, handc, hold, com);
 					winrate = win_rate(handc, pubc, com[0], plnum).second;
 					rel_winrate = winrate;
 					int hold_poker = get_handnut();//present nut hand

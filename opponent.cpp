@@ -29,7 +29,7 @@ void iterate(double* value, double change, int roundNum) {
 	*value = (*value * roundNum + change) / (double)(roundNum+1);
 }
 
-double coco(int* x, int* y, int ini_i, int steplen, int stepsize, int totallen) { // Correlation Coefficient (0~1)
+double coco(int* x, int* y, int ini_i, int steplen, int stepsize, int totallen) { // Correlation Coefficient (-1~1)
 	int i, j, cnt = 0, yistmp = 0;
 	if (totallen < steplen + stepsize) return 1;
 	if (y == NULL) {
