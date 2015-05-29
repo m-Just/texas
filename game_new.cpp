@@ -521,7 +521,7 @@ int main(int argc, char* agrv[]) {
 					int f = 0;
 					double rel_winrate;
 					Card pubc[6], handc[3];
-					change_to_Card(pubc, handc);
+					change_to_Card(pubc, handc, hold, com);
 					winrate = win_rate(handc, pubc, com[0], plnum).second;
 					rel_winrate = winrate;
 					int hold_poker = get_handnut();//present nut hand
