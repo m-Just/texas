@@ -466,7 +466,6 @@ void pre_action(int x, int *stage, int *stagenum, int round)
 		for(i = 1; i <= rank[0].pid; i++){
 			updateData(rank[i].pid, SHOW, rank[0].nut_hand*10+rank[i].nut_hand, -1, -1, POT_WIN, round);
 		}
-		compute(round);
 	}
 }
 //before action--------------------------------------------------------------------
