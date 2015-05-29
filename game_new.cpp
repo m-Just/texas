@@ -335,14 +335,14 @@ bool cmp(getraise a, getraise b)
 	return a.up < b.up;
 }
 
-int get_raise(int stage, int round, int nowbet, int mostbet)
+int get_raise(int stage, int stagenum, int round, int nowbet, int mostbet)
 {
 	int follow = 0, f = 0, upfol;
 	getraise ret[10];
 	ret[0].pid = 0;
 	for(int i = 1; i <= done[0].pid; i++){
-		if(done[i].pid == bblind.pid)f = 1;
-		if(f == 0 ){
+		if(done[i].pid == button.pid)f = 1;
+		if(f == 0 || stagenum > 1){
 			if(done[i].pid != my.pid){
 				upfol = estFold(done[i].pid, com, com[0], stage, round);
 			}
@@ -378,17 +378,18 @@ int get_raise(int stage, int round, int nowbet, int mostbet)
 //main logic part--------------------------------------------------------------
 
 //before action--------------------------------------------------------------------
-void pre_action(int x, int *stage, int round)
+void pre_action(int x, int *stage, int *stagenum int round)
 {
 	//get stage and init(leastraise)
 	static int stage_minus = 0;
-	if(x == BLIND_MSG)*stage = PREFLOP, leastraise = BIG_BLIND;
+	if(x == BLIND_MSG)*stage = PREFLOP, leastraise = BIG_BLIND, *stagenum = 0;
 	if(x == HOLD_MSG)leastraise = BIG_BLIND;
 	if(x == COM_CARDS_MSG){
 		if(com[0] == 3)*stage = FLOP;
 		if(com[0] == 4)*stage = TURN;
 		if(com[0] == 5)*stage = RIVER;
 		stage_minus = 1;
+		*stagenum = 0;
 		leastraise = BIG_BLIND;
 	}
 	//get stage and init(leastraise)
@@ -477,7 +478,7 @@ int main(int argc, char* agrv[]) {
 	my.money = START_MONEY;
 
 	/* main round loop */
-	int round, stage;
+	int round, stage, stagenum;
 	for (round = 0; round < MAX_ROUND; round++) {
 		mybet = 0;
 		leastraise = BIG_BLIND;
@@ -494,7 +495,7 @@ int main(int argc, char* agrv[]) {
 			}
 					
 			//pre action
-			pre_action(x, &stage, round);
+			pre_action(x, &stage, &stagenum, round);
 			if (x == POT_MSG)
 			{
 				compute(round);
@@ -528,7 +529,7 @@ int main(int argc, char* agrv[]) {
 					rel_winrate = winrate;
 					int hold_poker = get_handnut();//present nut hand
 					for(i = 1; i <= done[0].pid; i++){
-						if(done[i].pid == bblind.pid)f = 1;
+						if(done[i].pid == button.pid)f = 1;
 						int tmp = -1;
 						if(f == 0 || stagenum > 1)tmp = estHand(done[i].pid, com, com[0], stage, round);
 						else{
