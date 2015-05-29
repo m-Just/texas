@@ -15,6 +15,8 @@ extern ANAOPP opp[];
 
 int fd;// socket id code
 double pre_flop_rate[2][MAX_PLAYER_NUM + 1][52][52];
+int stage_minus = 0; //stage_minus == 1 means that the information may be from the last stage. 
+int stage;
 
 struct player
 {
@@ -37,8 +39,8 @@ int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 	if (fd != -1) printf("Connection established.\n");
 	else { printf("Connection failure. Program Abort.\n"); exit(1); }
 
-	char tmp[30];
-	strcpy(tmp, "avg_v2 need_notify \n");
+
+	strcpy(tmp, PNAME);
 	reg(id, fd, tmp);
 	return 1;
 }
@@ -340,21 +342,20 @@ bool cmp(getraise a, getraise b)
 	return a.up < b.up;
 }
 
-int get_raise(int stage, int stagenum, int round, int nowbet, int mostbet)
+int get_raise(int round, int nowbet, int mostbet)
 {
 	int follow = 0, f = 0, upfol;
 	getraise ret[10];
 	ret[0].pid = 0;
 	for(int i = 1; i <= done[0].pid; i++){
-		if(done[i].pid == button.pid)f = 1;
-		if(f == 0 || stagenum > 1){
-			if(done[i].pid != my.pid){
-				upfol = estFold(done[i].pid, com, com[0], stage, round);
-			}
-		}else{
-			if(stage > 2)upfol = estFold(done[i].pid, com, stage + 1, stage - 1, round);
-			else upfol = 0;
+		if (stage_minus && f){
+			if (stage > 2)upfol = estFold(done[i].pid, com, stage + 1, stage - 1, round);
+			else upfol = 0;	
 		}
+		else{
+			if (done[i].pid != my.pid) upfol = estFold(done[i].pid, com, com[0], stage, round);
+		}
+		if (done[i].pid == sblind.pid) f = 1;
 		if(upfol == 0)upfol = leastraise + nowbet;
 		if(upfol == -1)upfol = 2147483647;
 		ret[0].pid++;
@@ -383,18 +384,17 @@ int get_raise(int stage, int stagenum, int round, int nowbet, int mostbet)
 //main logic part--------------------------------------------------------------
 
 //before action--------------------------------------------------------------------
-void pre_action(int x, int *stage, int *stagenum, int round)
+void pre_action(int x, int round)
 {
 	//get stage and init(leastraise)
-	static int stage_minus = 0;
-	if(x == BLIND_MSG)*stage = PREFLOP, leastraise = BIG_BLIND, *stagenum = 0;
-	if(x == HOLD_MSG)*stage = PREFLOP, leastraise = BIG_BLIND;
+	stage_minus = 0;
+	if(x == BLIND_MSG)stage = PREFLOP, leastraise = BIG_BLIND;
+	if(x == HOLD_MSG) stage = PREFLOP, leastraise = BIG_BLIND;
 	if(x == COM_CARDS_MSG){
-		if(com[0] == 3)*stage = FLOP;
-		if(com[0] == 4)*stage = TURN;
-		if(com[0] == 5)*stage = RIVER;
+		if(com[0] == 3) stage = FLOP;
+		if(com[0] == 4) stage = TURN;
+		if(com[0] == 5) stage = RIVER;
 		stage_minus = 1;
-		*stagenum = 0;
 		leastraise = BIG_BLIND;
 	}
 	//get stage and init(leastraise)
@@ -437,7 +437,6 @@ void pre_action(int x, int *stage, int *stagenum, int round)
 	if(x == INQUIRE_MSG || x == NOTIFY_MSG){
 		int i;
 		int f = 0;
-		*stagenum++;
 		for(i = 1; i <= done[0].pid; i++){
 			if(done[i].pid == my.pid){
 				my.jetton = done[i].jetton;
@@ -447,11 +446,11 @@ void pre_action(int x, int *stage, int *stagenum, int round)
 			
 			if(stage_minus == 1 && f == 1){
 				int bet = done[i].bet;
-				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, *stage - 1, round);
+				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage - 1, round);
 			}
 			else{
 				int bet = done[i].bet;
-				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, *stage, round);
+				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage, round);
 			}
 			if(done[i].action == RAISE && done[i].pid != my.pid){
 				if(leastraise < done[i].bet - done[i + 1].bet)
@@ -503,7 +502,7 @@ int main(int argc, char* agrv[]) {
 			}
 					
 			//pre action
-			pre_action(x, &stage, &stagenum, round);
+			pre_action(x, round);
 			if (x == POT_MSG)
 			{
 				compute(round);
@@ -536,16 +535,14 @@ int main(int argc, char* agrv[]) {
 				if(stage >= 2){
 					int f = 0;
 					double rel_winrate;
-					winrate = win_rate(hold, com, com[0], plnum).second;
+					winrate = win_rate(hold + 1, com + 1, com[0], plnum).second;
 					rel_winrate = winrate;
 					int hold_poker = get_handnut();//present nut hand
 					for(i = 1; i <= done[0].pid; i++){
-						if(done[i].pid == button.pid)f = 1;
 						int tmp = -1;
-						if(f == 0 || stagenum > 1)tmp = estHand(done[i].pid, com, com[0], stage, round);
-						else{
-							if(stage > 2)tmp = estHand(done[i].pid, com, com[0], stage - 1, round);
-						}
+						if (stage_minus == 1 && f) tmp = tmp = estHand(done[i].pid, com, com[0], stage - 1, round);
+						else tmp = estHand(done[i].pid, com, com[0], stage, round);
+						if (done[i].pid == sblind.pid) f = 1;
 						if(tmp != -1 && tmp != 0){
 							double pos = 0.1;
 							if(hold_poker < tmp)pos = -0.1;
@@ -556,7 +553,7 @@ int main(int argc, char* agrv[]) {
 					for(int i = 1; i <= 8 - plnum; i++)ret *= 0.9;
 					uplim = get_uplim(rel_winrate, my.jetton, mybet);
 					if(rel_winrate * ret > 0.35){
-						int upraise = get_raise(stage, stagenum, round, done[1].bet, uplim);
+						int upraise = get_raise(round, done[1].bet, uplim);
 						if(upraise >= leastraise)action(RAISE, upraise, fd), leastraise = upraise, mybet = done[1].bet + upraise;
 						else{
 							if(needcall == 0)action(CHECK, 0, fd);

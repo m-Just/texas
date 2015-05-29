@@ -64,3 +64,6 @@
 #define SGI socket_get_int(fd)
 #define IOW get_word(msg, fd) //ignore one word from socket
 #endif
+
+/*Basic Information*/
+#define PNAME "Tiger need_notify\n"
