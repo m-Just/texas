@@ -8,10 +8,7 @@
 #include<algorithm>
 #include<string.h>
 using namespace std;
-
-#ifdef TEST
 #include <time.h>
-#endif
 
 extern ANAOPP opp[];
 
@@ -38,7 +35,7 @@ int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 	if (fd != -1) printf("Connection established.\n");
 	else { printf("Connection failure. Program Abort.\n"); exit(1); }
 
-	reg(id, fd, "hdbdl need_notify \n");
+	reg(id, fd, "avg_boy need_notify \n");
 	return 1;
 }
 
@@ -67,7 +64,6 @@ int pot = 0;
 
 void Mate1Action(int round)
 {
-#ifdef TEST
 	double avrg = 0;
 	const int AVGC = 2;
 	rate R;
@@ -83,13 +79,13 @@ void Mate1Action(int round)
 	{
 		avrg += opp[i].avrgBet * (opp[i].jetton[round - 1] + opp[i].money[round - 1]);
 		maxbet = max(maxbet, opp[i].lastbet[round]);
+#ifdef TEST
 		if (round > 0)printf("round: %d id: %d money: %d jetton: %d average bet: %lf last bet: %d\n", round - 1, opp[i].pid, opp[i].money[round - 1], opp[i].jetton[round - 1], opp[i].avrgBet, opp[i].lastbet[round - 1]);
+#endif
 	}
-	printf("\n");
 	avrg /= 28000;
 	int mebet = (int)(avrg * win * AVGC);
 	if (round < 10 || maxbet > mebet) action(FOLD, 0, fd); else action(RAISE, (int)(mebet - maxbet), fd);
-#endif
 }
 
 int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:common cards  7:showdown  8:pot-win  9:notify

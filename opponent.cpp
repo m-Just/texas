@@ -70,7 +70,7 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	// otherwise, input 0 if not available.	
 #ifdef TEST
 	FILE *fout = fopen("update.txt", "a");
-	fprintf(fout, "id: %7d action: %7d num: %7d stage: %7d roundNum: %7d\n", id, action, num, stage, roundNum);
+	//fprintf(fout, "id: %7d action: %7d num: %7d stage: %7d roundNum: %7d\n", id, action, num, stage, roundNum);
 #endif
 	int i = hash(id); int j;
 	opp[i].currentAction = action;
@@ -121,19 +121,22 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 void compute(int roundNum)
 {
 #ifdef TEST
-	FILE *fout = fopen("opponent.txt", "a");
+	FILE *fout = fopen("compute.txt", "a");
 #endif
 	for (int i = 0; i < 8; i++) if (opp[i].money > 0)
 	{
 		int k = RIVER - 1;
 		while (k > 0 && opp[i].bet[roundNum][k] == 0) k--;
 		double lastbet = opp[i].bet[roundNum][k];
+		opp[i].lastbet[roundNum] = (int)lastbet;
 		iterate(&opp[i].avrgBet, lastbet, roundNum);
 		iterate(&opp[i].variance, pow(lastbet - opp[i].avrgBet, 2.0), roundNum);
 		//fprintf(fout, "round: %d id: %d lastbet: %d average: %lf variance: %lf\n", roundNum, opp[i].pid, (int)lastbet, opp[i].avrgBet, opp[i].variance);
+#ifdef TEST		
 		fprintf(fout, "round: %6d player:%6d", roundNum, opp[i].pid);
 		for (int j = 0; j < RIVER; j++) fprintf(fout, "%7d ", opp[i].bet[roundNum][j]);
 		fprintf(fout, "\n");
+#endif
 	}
 #ifdef TEST
 	fclose(fout);
@@ -172,7 +175,7 @@ double jettonPara(int id, int stage, int roundNum, int maxbetRnd) {
 int estHand(int id, int* card, int cardNum, int stage, int roundNum) { // estimating the most possible poker hand the opponent's got
 	// by study the opponent's possible hands and pattern of actions(style).
 #ifdef TEST
-	FILE *fout = fopen("opponent.txt", "a");
+	FILE *fout = fopen("estHand.txt", "a");
 #endif
 	int i = hash(id);
 	int b = opp[i].bet[roundNum][stage-1];
@@ -252,7 +255,7 @@ int estHand(int id, int* card, int cardNum, int stage, int roundNum) { // estima
 // note: estimation is not available before the stage of FLOP
 int estFold(int id, int* card, int cardNum, int stage, int roundNum) { // return the estimated amount of bet that would force the opponent's to fold
 #ifdef TEST
-	FILE* fout = fopen("opponent.txt", "a");
+	FILE* fout = fopen("estFold.txt", "a");
 #endif
 	int i = hash(id);
 	int eHand = estHand(id, card, cardNum, stage, roundNum);       // the return value
