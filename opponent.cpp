@@ -69,12 +69,8 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	// ESPECIALLY, input the poker hands into "num" for SHOW action.
 	// otherwise, input 0 if not available.	
 #ifdef TEST
-<<<<<<< HEAD
 	FILE *fout = fopen("update.txt", "a");
 	fprintf(fout, "id: %7d action: %7d num: %7d stage: %7d roundNum: %7d\n", id, action, num, stage, roundNum);
-=======
-	FILE *fout = fopen("opponent.txt", "a");
->>>>>>> origin/new
 #endif
 	int i = hash(id); int j;
 	opp[i].currentAction = action;
@@ -110,17 +106,6 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	
 	if (opp[i].maxbet[0] < *b) { opp[i].maxbet[0] = *b; opp[i].maxbetRound[0] = roundNum; }
 
-	if (action == FOLD || action == SHOW ) {  // the errors of the values below are big when roundNum is small
-		opp[i].lastbet[roundNum] = *b;
-		opp[i].cc = coco(opp[i].lastbet, opp[i].jetton, 0, 20, 10, roundNum);
-		iterate(&opp[i].avrgBet,  (double)*b, roundNum);
-		iterate(&opp[i].variance, pow((double)(*b-opp[i].avrgBet), 2.0), roundNum);
-		iterate(&opp[i].foldrate, (double)(action==FOLD), roundNum);
-#ifdef TEST
-		fprintf(fout, "round %d player%d : bet:%d abet:%f var:%f foldrate:%f\n", roundNum, opp[i].pid, *b, opp[i].avrgBet, opp[i].variance, opp[i].foldrate);
-#endif
-	}
-	
 	if (roundNum > 0 && !(roundNum%10) && opp[i].style != BLUFF) {
 		if 	(opp[i].avrgBet < 2*BIG_BLIND) opp[i].style = TIGHT;
 		else if (opp[i].avrgBet < 5*BIG_BLIND) opp[i].style = NORMAL;
