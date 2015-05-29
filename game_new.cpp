@@ -465,7 +465,6 @@ void pre_action(int x, int round)
 		for(i = 1; i <= rank[0].pid; i++){
 			updateData(rank[i].pid, SHOW, rank[0].nut_hand*10+rank[i].nut_hand, -1, -1, POT_WIN, round);
 		}
-		compute(round);
 	}
 }
 //before action--------------------------------------------------------------------
@@ -544,15 +543,15 @@ int main(int argc, char* agrv[]) {
 						else tmp = estHand(done[i].pid, com, com[0], stage, round);
 						if (done[i].pid == sblind.pid) f = 1;
 						if(tmp != -1 && tmp != 0){
-							double pos = 0.1;
-							if(hold_poker < tmp)pos = -0.1;
-							rel_winrate *= (1 + (0.2 * (hold_poker - tmp) - pos));
+							double pos = REL_WINRATE_POS;
+							if(hold_poker < tmp)pos = -REL_WINRATE_POS;
+							rel_winrate *= (1 + (REL_WINRATE_MULT * (hold_poker - tmp) - pos));
 						}
 					}
 					double ret = 1.0;
 					for(int i = 1; i <= 8 - plnum; i++)ret *= 0.9;
 					uplim = get_uplim(rel_winrate, my.jetton, mybet);
-					if(rel_winrate * ret > 0.35){
+					if(rel_winrate * ret > RAISELEVEL){
 						int upraise = get_raise(round, done[1].bet, uplim);
 						if(upraise >= leastraise)action(RAISE, upraise, fd), leastraise = upraise, mybet = done[1].bet + upraise;
 						else{
