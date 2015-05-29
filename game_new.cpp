@@ -510,8 +510,8 @@ int main(int argc, char* agrv[]) {
 			}
 
 			//action
-			if (x == INQUIRE_MSG) Mate1Action(round, stage);
-			/*
+			//if (x == INQUIRE_MSG) Mate1Action(round, stage);
+			
 			if(x == INQUIRE_MSG){
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
 				if(done[1].bet > mybet)needcall = 1;
@@ -567,7 +567,7 @@ int main(int argc, char* agrv[]) {
 						}
 					}
 				}
-			}*/
+			}
 		}
 	}
 
