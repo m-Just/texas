@@ -525,11 +525,15 @@ int main(int argc, char* agrv[]) {
 #ifdef WRITE_IN_FILE
 				fprintf(fout, "winrate = %d  mybet = %d  uplim = %d\n\n", &winrate, &mybet, &uplim);
 #endif
-					if(needcall == 0)action(CHECK, 0, fd);
-					else{
-						if(done[1].bet > uplim)action(FOLD, 0, fd);
-						else action(CALL, 0, fd), mybet = done[1].bet;
+					int raisebet = (rnd(0.5 + winrate*10) - 1)* BIG_BLIND;
+					if (raisebet <= done[1].bet || raisebet > uplim) {
+						if(needcall == 0) action(CHECK, 0, fd);
+						else {
+							if(done[1].bet > uplim) action(FOLD, 0, fd);
+							else { action(CALL, 0, fd); mybet = done[1].bet; }
+						}
 					}
+					else action(RAISE, raisebet/done[1].bet*done[1].bet, fd);  // raise before flop
 				}
 				if(stage >= 2){
 					int f = 0;
