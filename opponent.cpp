@@ -68,8 +68,9 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	// num is only available for CALL, RAISE, BLIND, SHOW and POT actions.
 	// ESPECIALLY, input the poker hands into "num" for SHOW action.
 	// otherwise, input 0 if not available.	
-#ifdef _TEST
-	FILE *fout = fopen("opponent.txt", "a");
+#ifdef TEST
+	FILE *fout = fopen("update.txt", "a");
+	fprintf(fout, "id: %7d action: %7d num: %7d stage: %7d roundNum: %7d\n", id, action, num, stage, roundNum);
 #endif
 	int i = hash(id); int j;
 	opp[i].currentAction = action;
@@ -123,7 +124,7 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 		else    /* avrgBet >= 5BB */	       opp[i].style = LOOSE;
 	}
 
-#ifdef _TEST
+#ifdef TEST
 	fclose(fout);
 #endif
 	// check if the estimate() is right. if not, re-analyse and considering bluff-playing.
@@ -136,12 +137,14 @@ void compute(int roundNum)
 #endif
 	for (int i = 0; i < 8; i++) if (opp[i].money > 0)
 	{
-		double lastbet = opp[i].bet[roundNum][RIVER - 1];
+		int k = RIVER - 1;
+		while (k > 0 && opp[i].bet[roundNum][k] == 0) k--;
+		double lastbet = opp[i].bet[roundNum][k];
 		iterate(&opp[i].avrgBet, lastbet, roundNum);
 		iterate(&opp[i].variance, pow(lastbet - opp[i].avrgBet, 2.0), roundNum);
 		//fprintf(fout, "round: %d id: %d lastbet: %d average: %lf variance: %lf\n", roundNum, opp[i].pid, (int)lastbet, opp[i].avrgBet, opp[i].variance);
-		fprintf(fout, "round: %d player:%d", roundNum, opp[i].pid);
-		for (int j = 0; j < RIVER; j++) fprintf(fout, "%d ", opp[i].bet[roundNum][j]);
+		fprintf(fout, "round: %6d player:%6d", roundNum, opp[i].pid);
+		for (int j = 0; j < RIVER; j++) fprintf(fout, "%7d ", opp[i].bet[roundNum][j]);
 		fprintf(fout, "\n");
 	}
 #ifdef TEST

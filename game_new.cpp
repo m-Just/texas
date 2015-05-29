@@ -5,7 +5,9 @@
 #include "conversion.h"
 #include "opponent.h"
 #include "Card.h"
+#include<algorithm>
 #include<string.h>
+using namespace std;
 
 #ifdef TEST
 #include <time.h>
@@ -36,7 +38,7 @@ int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 	if (fd != -1) printf("Connection established.\n");
 	else { printf("Connection failure. Program Abort.\n"); exit(1); }
 
-	reg(id, fd, "hdbdl need notify \n");
+	reg(id, fd, "hdbdl need_notify \n");
 	return 1;
 }
 
@@ -69,7 +71,12 @@ void Mate1Action(int round)
 	double avrg = 0;
 	const int AVGC = 2;
 	rate R;
-	if (com[0] >= 3) R = win_rate(hold + 1, com + 1, com[0], plnum); else R = make_pair(0.125, 0);
+	if (com[0] >= 3) R = win_rate(hold + 1, com + 1, com[0], plnum); 
+	else
+	{
+		R.first = 0;
+		R.second = 0.125;
+	}
 	double win = R.second;
 	int maxbet = 0;
 	for (int i = 0; i < 8; i++)
@@ -328,14 +335,14 @@ bool cmp(getraise a, getraise b)
 	return a.up < b.up;
 }
 
-int get_raise(int stage, int stagenum, int round, int nowbet, int mostbet)
+int get_raise(int stage, int round, int nowbet, int mostbet)
 {
 	int follow = 0, f = 0, upfol;
 	getraise ret[10];
 	ret[0].pid = 0;
 	for(int i = 1; i <= done[0].pid; i++){
 		if(done[i].pid == bblind.pid)f = 1;
-		if(f == 0 || stagenum > 1){
+		if(f == 0 ){
 			if(done[i].pid != my.pid){
 				upfol = estFold(done[i].pid, com, com[0], stage, round);
 			}
@@ -360,7 +367,7 @@ int get_raise(int stage, int stagenum, int round, int nowbet, int mostbet)
 				if(done[k].pid == ret[i].pid){
 					id = k; break;
 				}
-			tmp += ret[i].up - done[id],bet;
+			tmp += ret[i].up - done[id].bet;
 		}
 		if(tmp > maxn)maxn = tmp, ans = ret[i].up - nowbet;
 	}
@@ -371,19 +378,19 @@ int get_raise(int stage, int stagenum, int round, int nowbet, int mostbet)
 //main logic part--------------------------------------------------------------
 
 //before action--------------------------------------------------------------------
-void pre_action(int x, int *stage, int *stagenum, int round)
+void pre_action(int x, int *stage, int round)
 {
 	//get stage and init(leastraise)
-	if(x == BLIND_MSG)*stage = PREFLOP, *stagenum = 0, leastraise = BIG_BLIND;
+	static int stage_minus = 0;
+	if(x == BLIND_MSG)*stage = PREFLOP, leastraise = BIG_BLIND;
 	if(x == HOLD_MSG)leastraise = BIG_BLIND;
 	if(x == COM_CARDS_MSG){
 		if(com[0] == 3)*stage = FLOP;
 		if(com[0] == 4)*stage = TURN;
 		if(com[0] == 5)*stage = RIVER;
-		*stagenum = 0;
+		stage_minus = 1;
 		leastraise = BIG_BLIND;
 	}
-	if(x == SHOW_MSG || x == POT_MSG)*stage = POT_WIN, *stagenum = 0;
 	//get stage and init(leastraise)
 	
 	
@@ -424,27 +431,28 @@ void pre_action(int x, int *stage, int *stagenum, int round)
 	if(x == INQUIRE_MSG || x == NOTIFY_MSG){
 		int i;
 		int f = 0;
-		*stagenum++;
 		for(i = 1; i <= done[0].pid; i++){
 			if(done[i].pid == my.pid){
 				my.jetton = done[i].jetton;
 				my.money = done[i].money;
 				mybet = done[i].bet;
 			}
-			if(done[i].pid == bblind.pid)f = 1;
-			if(f == 0 || *stagenum > 1){
+			
+			if(stage_minus == 1 && f == 1){
+				int bet = done[i].bet;
+				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, *stage - 1, round);
+			}
+			else{
 				int bet = done[i].bet;
 				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, *stage, round);
-			}else{
-				int bet = done[i].bet;
-				if(*stage > 1)updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, *stage - 1, round);
-				else updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, *stage, round);
 			}
 			if(done[i].action == RAISE && done[i].pid != my.pid){
 				if(leastraise < done[i].bet - done[i + 1].bet)
 					leastraise = done[i].bet - done[i + 1].bet;
 			}
+			if(done[i].pid == sblind.pid)f = 1;
 		}
+		stage_minus = 0;
 	}
 	if(x == SHOW_MSG){
 		int i;
@@ -469,7 +477,7 @@ int main(int argc, char* agrv[]) {
 	my.money = START_MONEY;
 
 	/* main round loop */
-	int round, stage, stagenum;
+	int round, stage;
 	for (round = 0; round < MAX_ROUND; round++) {
 		mybet = 0;
 		leastraise = BIG_BLIND;
@@ -486,8 +494,7 @@ int main(int argc, char* agrv[]) {
 			}
 					
 			//pre action
-			pre_action(x, &stage, &stagenum, round);
-			if (x == INQUIRE_MSG) Mate1Action(round);
+			pre_action(x, &stage, round);
 			if (x == POT_MSG)
 			{
 				compute(round);
@@ -495,6 +502,8 @@ int main(int argc, char* agrv[]) {
 			}
 
 			//action
+			if (x == INQUIRE_MSG) Mate1Action(round);
+			/*
 			if(x == INQUIRE_MSG){
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
 				if(done[1].bet > mybet)needcall = 1;
@@ -552,7 +561,7 @@ int main(int argc, char* agrv[]) {
 						}
 					}
 				}
-			}
+			}*/
 		}
 	}
 
