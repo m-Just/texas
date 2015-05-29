@@ -65,7 +65,7 @@ double coco(int* x, int* y, int ini_i, int steplen, int stepsize, int totallen) 
 // update after every inquire, notify(if available), showdown and pot-win message
 // for the representation and detailed definition of the actions and stage, please view "constant.h"
 int updateData(int id, int action, int num, int jet, int m, int stage, int roundNum) { // 0 <= roundNum <= MAX_ROUND-1
-	// num is only available for CALL, RAISE, BLIND, SHOW and POT actions.
+	// all the actions except SHOW need to input the total bet into "num"
 	// ESPECIALLY, input the poker hands into "num" for SHOW action.
 	// otherwise, input 0 if not available.	
 #ifdef TEST
@@ -106,6 +106,8 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	
 	if (opp[i].maxbet[0] < *b) { opp[i].maxbet[0] = *b; opp[i].maxbetRound[0] = roundNum; }
 
+	if (action == FOLD || action == SHOW) opp[i].lastbet[roundNum] = *b;
+
 	if (roundNum > 0 && !(roundNum%10) && opp[i].style != BLUFF) {
 		if 	(opp[i].avrgBet < 2*BIG_BLIND) opp[i].style = TIGHT;
 		else if (opp[i].avrgBet < 5*BIG_BLIND) opp[i].style = NORMAL;
@@ -125,13 +127,10 @@ void compute(int roundNum)
 #endif
 	for (int i = 0; i < 8; i++) if (opp[i].money > 0)
 	{
-		int k = RIVER - 1;
-		while (k > 0 && opp[i].bet[roundNum][k] == 0) k--;
-		double lastbet = opp[i].bet[roundNum][k];
-		iterate(&opp[i].avrgBet,  (double)lastbet, roundNum);
-		iterate(&opp[i].variance, pow(lastbet - opp[i].avrgBet, 2.0), roundNum);
+		iterate(&opp[i].avrgBet,  (double)opp[i].lastbet[roundNum], roundNum);
+		iterate(&opp[i].variance, pow(opp[i].lastbet[roundNum] - opp[i].avrgBet, 2.0), roundNum);
 		iterate(&opp[i].foldrate, (double)(opp[i].currentAction==FOLD), roundNum);
-		//fprintf(fout, "round: %d id: %d lastbet: %d average: %lf variance: %lf\n", roundNum, opp[i].pid, (int)lastbet, opp[i].avrgBet, opp[i].variance);
+		fprintf(fout, "round: %d id: %d lastbet: %d average: %lf variance: %lf\n", roundNum, opp[i].pid, opp[i].lastbet[roundNum], opp[i].avrgBet, opp[i].variance);
 		fprintf(fout, "round: %6d player:%6d", roundNum, opp[i].pid);
 		for (int j = 0; j < RIVER; j++) fprintf(fout, "%7d ", opp[i].bet[roundNum][j]);
 		fprintf(fout, "\n");
