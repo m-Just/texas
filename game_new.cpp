@@ -378,7 +378,7 @@ int get_raise(int stage, int stagenum, int round, int nowbet, int mostbet)
 //main logic part--------------------------------------------------------------
 
 //before action--------------------------------------------------------------------
-void pre_action(int x, int *stage, int *stagenum int round)
+void pre_action(int x, int *stage, int *stagenum, int round)
 {
 	//get stage and init(leastraise)
 	static int stage_minus = 0;
