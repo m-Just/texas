@@ -548,9 +548,7 @@ int main(int argc, char* agrv[]) {
 					for(int i = 1; i <= 8 - plnum; i++)ret *= 0.9;
 					uplim = get_uplim(rel_winrate, my.jetton, mybet);
 					if(rel_winrate * ret > 0.35){
-						int tmp = my.jetton / 4;
-						if(uplim < tmp)tmp = uplim;
-						int upraise = get_raise(stage, stagenum, round, done[1].bet, tmp);
+						int upraise = get_raise(stage, stagenum, round, done[1].bet, uplim);
 						if(upraise >= leastraise)action(RAISE, upraise, fd), leastraise = upraise, mybet = done[1].bet + upraise;
 						else{
 							if(needcall == 0)action(CHECK, 0, fd);
