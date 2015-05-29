@@ -547,15 +547,15 @@ int main(int argc, char* agrv[]) {
 							if(stage > 2)tmp = estHand(done[i].pid, com, com[0], stage - 1, round);
 						}
 						if(tmp != -1 && tmp != 0){
-							double pos = 0.1;
-							if(hold_poker < tmp)pos = -0.1;
-							rel_winrate *= (1 + (0.2 * (hold_poker - tmp) - pos));
+							double pos = REL_WINRATE_POS;
+							if(hold_poker < tmp)pos = -REL_WINRATE_POS;
+							rel_winrate *= (1 + (REL_WINRATE_MULT * (hold_poker - tmp) - pos));
 						}
 					}
 					double ret = 1.0;
 					for(int i = 1; i <= 8 - plnum; i++)ret *= 0.9;
 					uplim = get_uplim(rel_winrate, my.jetton, mybet);
-					if(rel_winrate * ret > 0.35){
+					if(rel_winrate * ret > RAISELEVEL){
 						int upraise = get_raise(stage, stagenum, round, done[1].bet, uplim);
 						if(upraise >= leastraise)action(RAISE, upraise, fd), leastraise = upraise, mybet = done[1].bet + upraise;
 						else{
