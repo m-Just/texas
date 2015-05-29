@@ -498,8 +498,6 @@ int main(int argc, char* agrv[]) {
 			if(x == INQUIRE_MSG){
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
 				if(done[1].bet > mybet)needcall = 1;
-				int stage = 1;
-				if(com[0] > 0)stage += com[0] - 2;
 				double winrate;
 				if(stage == 1){//before flop
 					Card pubc[6], handc[3];
