@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "socket.h"
 #include "constant.h"
 #include "conversion.h"
@@ -13,7 +14,7 @@ using namespace std;
 extern ANAOPP opp[];
 
 int fd;// socket id code
-double pre_flop_rate[2][MAX_PLAYER_NUM][52][52];
+double pre_flop_rate[2][MAX_PLAYER_NUM + 1][52][52];
 
 struct player
 {
@@ -37,7 +38,7 @@ int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 	else { printf("Connection failure. Program Abort.\n"); exit(1); }
 
 	char tmp[30];
-	strcpy(tmp, "hdbdl need_notify \n");
+	strcpy(tmp, "avg_v2 need_notify \n");
 	reg(id, fd, tmp);
 	return 1;
 }
@@ -65,30 +66,35 @@ struct pot_win
 int plnum = 0; //player number
 int pot = 0;
 
-void Mate1Action(int round)
+void Mate1Action(int round, int stage)
 {
 	double avrg = 0;
-	const int AVGC = 2;
+	const double AVGC = 1.6;
+	double draw_line = 1.0 / plnum;
 	rate R;
 	if (com[0] >= 3) R = win_rate(hold + 1, com + 1, com[0], plnum); 
 	else
 	{
-		R.first = 0;
-		R.second = 0.125;
+		R.first = pre_flop_rate[0][plnum][hold[1]][hold[2]];
+		R.second = pre_flop_rate[1][plnum][hold[1]][hold[2]];
 	}
-	double win = R.second;
 	int maxbet = 0;
 	for (int i = 0; i < 8; i++)
 	{
 		avrg += opp[i].avrgBet * (opp[i].jetton[round - 1] + opp[i].money[round - 1]);
-		maxbet = max(maxbet, opp[i].lastbet[round]);
-#ifdef TEST
-		if (round > 0)printf("round: %d id: %d money: %d jetton: %d average bet: %lf last bet: %d\n", round - 1, opp[i].pid, opp[i].money[round - 1], opp[i].jetton[round - 1], opp[i].avrgBet, opp[i].lastbet[round - 1]);
-#endif
+		maxbet = max(maxbet, opp[i].bet[round][stage - 1]);
 	}
 	avrg /= 28000;
-	int mebet = (int)(avrg * win * AVGC);
-	if (round < 10 || maxbet > mebet) action(FOLD, 0, fd); else action(RAISE, (int)(mebet - maxbet), fd);
+	int mebet = (int)(avrg * pow(2.0 ,(R.second - draw_line * 1.5) / draw_line * 3));
+	if (round < 10) mebet = 0;
+#ifdef _TEST
+	printf("/*********round : %d ***********/", round);
+	printf("player: %d\n", plnum);
+	print_Card(hold + 1, 2, "hold");
+	print_Card(com + 1, com[0], "public card");
+	printf("average:%.0lf draw: %lf win: %lf maxbet: %7d mebet:%7d\n", avrg, R.first, R.second, maxbet, mebet);
+#endif
+	if (maxbet > mebet) action(FOLD, 0, fd); else action(RAISE, (int)(mebet - maxbet), fd);
 }
 
 int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:common cards  7:showdown  8:pot-win  9:notify
@@ -472,6 +478,7 @@ int main(int argc, char* agrv[]) {
 #endif
 	
 	ConnectAndReg(argc, agrv);
+	read_pre_flop(pre_flop_rate[1], pre_flop_rate[0]);
 
 	my.pid = atoi(agrv[5]);
 	my.jetton = START_JETTON;
@@ -503,7 +510,8 @@ int main(int argc, char* agrv[]) {
 			}
 
 			//action
-			//if (x == INQUIRE_MSG) Mate1Action(round);
+			if (x == INQUIRE_MSG) Mate1Action(round, stage);
+			/*
 			if(x == INQUIRE_MSG){
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
 				if(done[1].bet > mybet)needcall = 1;
@@ -563,7 +571,7 @@ int main(int argc, char* agrv[]) {
 						}
 					}
 				}
-			}
+			}*/
 		}
 	}
 

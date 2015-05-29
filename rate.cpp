@@ -107,10 +107,16 @@ void read_pre_flop(double win[][52][52], double draw[][52][52])
 {
 	FILE *fin = fopen("pre_flop_win_rate.txt", "r");
 	int player_num, i, j;
-	while (fscanf(fin, "%d %d %d %d %d", player_num, i, j, win[player_num][i][j], draw[player_num][i][j]) != EOF)
+	int cnt = 0;
+	while (fscanf(fin, "%d %d %d ", &player_num, &i, &j) != EOF)
 	{
-		win[player_num][j][i] = win[player_num][i][j];
-		draw[player_num][j][i] = draw[player_num][j][i];
+		double a, b;
+		fscanf(fin, "%lf %lf", &a, &b);
+		//if (cnt % 1000 == 0)printf("%lf %lf\n", a, b);
+		cnt++;
+		win[player_num][j][i] = win[player_num][i][j] = a;
+		draw[player_num][j][i] = draw[player_num][i][j] = b;
 	}
+
 	fclose(fin);
 }

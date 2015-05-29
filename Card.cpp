@@ -172,3 +172,9 @@ void print_Card(Card card[], int num, char *card_type)
 	printf("\n**\n");
 }
 
+void print_Card(int card[], int num, char * card_type)
+{
+	Card c[10];
+	for (int i = 0; i < num; i++) c[i] = int2card(card[i]);
+	print_Card(c, num, card_type);
+}
