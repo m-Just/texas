@@ -63,4 +63,11 @@
 /*Abbr*/
 #define SGI socket_get_int(fd)
 #define IOW get_word(msg, fd) //ignore one word from socket
+
+/* WINRATE */
+#define REL_WINRATE_POS 0.1
+#define REL_WINRATE_MULT 0.2
+
+/* RAISE */
+#define RAISELEVEL 0.35
 #endif
