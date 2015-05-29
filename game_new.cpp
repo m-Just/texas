@@ -525,7 +525,7 @@ int main(int argc, char* agrv[]) {
 #ifdef WRITE_IN_FILE
 				fprintf(fout, "winrate = %d  mybet = %d  uplim = %d\n\n", &winrate, &mybet, &uplim);
 #endif
-					int raisebet = (rnd(0.5 + winrate*10) - 1)* BIG_BLIND;
+					int raisebet = (rnd(winrate*plnum) - 1) * BIG_BLIND;
 					if (raisebet <= done[1].bet || raisebet > uplim) {
 						if(needcall == 0) action(CHECK, 0, fd);
 						else {
