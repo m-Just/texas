@@ -388,7 +388,7 @@ void pre_action(int x, int *stage, int *stagenum, int round)
 	//get stage and init(leastraise)
 	static int stage_minus = 0;
 	if(x == BLIND_MSG)*stage = PREFLOP, leastraise = BIG_BLIND, *stagenum = 0;
-	if(x == HOLD_MSG)leastraise = BIG_BLIND;
+	if(x == HOLD_MSG)*stage = PREFLOP, leastraise = BIG_BLIND;
 	if(x == COM_CARDS_MSG){
 		if(com[0] == 3)*stage = FLOP;
 		if(com[0] == 4)*stage = TURN;
@@ -437,6 +437,7 @@ void pre_action(int x, int *stage, int *stagenum, int round)
 	if(x == INQUIRE_MSG || x == NOTIFY_MSG){
 		int i;
 		int f = 0;
+		*stagenum++;
 		for(i = 1; i <= done[0].pid; i++){
 			if(done[i].pid == my.pid){
 				my.jetton = done[i].jetton;
@@ -513,12 +514,19 @@ int main(int argc, char* agrv[]) {
 			//if (x == INQUIRE_MSG) Mate1Action(round, stage);
 			
 			if(x == INQUIRE_MSG){
+#ifdef WRITE_IN_FILE
+				fprintf(fout, "com[0] = %d  stage = %d\n\n", &com[0], &stage);
+#endif
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
 				if(done[1].bet > mybet)needcall = 1;
+				else needcall = 0;
 				double winrate;
 				if(stage == 1){//before flop
 					winrate = pre_flop_rate[1][plnum][hold[1]][hold[2]];	
 					uplim = get_uplim(winrate, my.jetton, mybet);
+#ifdef WRITE_IN_FILE
+				fprintf(fout, "winrate = %d  mybet = %d  uplim = %d\n\n", &winrate, &mybet, &uplim);
+#endif
 					if(needcall == 0)action(CHECK, 0, fd);
 					else{
 						if(done[1].bet > uplim)action(FOLD, 0, fd);
@@ -548,9 +556,7 @@ int main(int argc, char* agrv[]) {
 					for(int i = 1; i <= 8 - plnum; i++)ret *= 0.9;
 					uplim = get_uplim(rel_winrate, my.jetton, mybet);
 					if(rel_winrate * ret > 0.35){
-						int tmp = my.jetton / 4;
-						if(uplim < tmp)tmp = uplim;
-						int upraise = get_raise(stage, stagenum, round, done[1].bet, tmp);
+						int upraise = get_raise(stage, stagenum, round, done[1].bet, uplim);
 						if(upraise >= leastraise)action(RAISE, upraise, fd), leastraise = upraise, mybet = done[1].bet + upraise;
 						else{
 							if(needcall == 0)action(CHECK, 0, fd);
