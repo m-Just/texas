@@ -349,11 +349,11 @@ int get_raise(int round, int nowbet, int mostbet)
 	ret[0].pid = 0;
 	for(int i = 1; i <= done[0].pid; i++){
 		if (stage_minus && f){
-			if (stage > 2)upfol = estFold(done[i].pid, com, stage + 1, stage - 1, round);
+			if (stage > 2)upfol = estFold(done[i].pid, com + 1, stage + 1, stage - 1, round);
 			else upfol = 0;	
 		}
 		else{
-			if (done[i].pid != my.pid) upfol = estFold(done[i].pid, com, com[0], stage, round);
+			if (done[i].pid != my.pid) upfol = estFold(done[i].pid, com + 1, com[0], stage, round);
 		}
 		if (done[i].pid == sblind.pid) f = 1;
 		if(upfol == 0)upfol = leastraise + nowbet;
@@ -539,8 +539,8 @@ int main(int argc, char* agrv[]) {
 					int hold_poker = get_handnut();//present nut hand
 					for(i = 1; i <= done[0].pid; i++){
 						int tmp = -1;
-						if (stage_minus == 1 && f) tmp = tmp = estHand(done[i].pid, com, com[0], stage - 1, round);
-						else tmp = estHand(done[i].pid, com, com[0], stage, round);
+						if (stage_minus == 1 && f) tmp = estHand(done[i].pid, com + 1, com[0], stage - 1, round);
+						else tmp = estHand(done[i].pid, com + 1, com[0], stage, round);
 						if (done[i].pid == sblind.pid) f = 1;
 						if(tmp != -1 && tmp != 0){
 							double pos = REL_WINRATE_POS;
