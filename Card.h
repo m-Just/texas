@@ -48,4 +48,6 @@ rate win_rate(const int hand_card[], int public_card[], const int &public_card_n
 rate make_pair(double x1, double x2);
 
 void print_Card(Card card[], int num, char * card_type);
+
+void read_pre_flop(double win[][52][52], double draw[][52][52]);
 #endif

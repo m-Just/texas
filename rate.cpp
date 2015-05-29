@@ -102,3 +102,15 @@ rate win_rate(const int hand_card[], int public_card[], const int &public_card_n
 	for (int i = 0; i < public_card_number; i++) com[i] = int2card(public_card[i]);
 	return win_rate(hold, com, public_card_number, player_number);
 }
+
+void read_pre_flop(double win[][52][52], double draw[][52][52])
+{
+	FILE *fin = fopen("pre_flop_win_rate.txt", "r");
+	int player_num, i, j;
+	while (fscanf(fin, "%d %d %d %d %d", player_num, i, j, win[player_num][i][j], draw[player_num][i][j]) != EOF)
+	{
+		win[player_num][j][i] = win[player_num][i][j];
+		draw[player_num][j][i] = draw[player_num][j][i];
+	}
+	fclose(fin);
+}

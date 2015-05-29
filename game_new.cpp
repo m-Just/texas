@@ -13,6 +13,7 @@ using namespace std;
 extern ANAOPP opp[];
 
 int fd;// socket id code
+double pre_flop_rate[2][MAX_PLAYER_NUM][52][52];
 
 struct player
 {
@@ -36,6 +37,7 @@ int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 	else { printf("Connection failure. Program Abort.\n"); exit(1); }
 
 	reg(id, fd, "avg_boy need_notify \n");
+	read_pre_flop(pre_flop_rate[1], pre_flop_rate[0]);
 	return 1;
 }
 
@@ -500,8 +502,7 @@ int main(int argc, char* agrv[]) {
 			}
 
 			//action
-			if (x == INQUIRE_MSG) Mate1Action(round);
-			/*
+			//if (x == INQUIRE_MSG) Mate1Action(round);
 			if(x == INQUIRE_MSG){
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
 				if(done[1].bet > mybet)needcall = 1;
@@ -561,7 +562,7 @@ int main(int argc, char* agrv[]) {
 						}
 					}
 				}
-			}*/
+			}
 		}
 	}
 
