@@ -388,7 +388,7 @@ void pre_action(int x, int *stage, int *stagenum, int round)
 	//get stage and init(leastraise)
 	static int stage_minus = 0;
 	if(x == BLIND_MSG)*stage = PREFLOP, leastraise = BIG_BLIND, *stagenum = 0;
-	if(x == HOLD_MSG)leastraise = BIG_BLIND;
+	if(x == HOLD_MSG)*stage = PREFLOP, leastraise = BIG_BLIND;
 	if(x == COM_CARDS_MSG){
 		if(com[0] == 3)*stage = FLOP;
 		if(com[0] == 4)*stage = TURN;
@@ -437,6 +437,7 @@ void pre_action(int x, int *stage, int *stagenum, int round)
 	if(x == INQUIRE_MSG || x == NOTIFY_MSG){
 		int i;
 		int f = 0;
+		*stagenum++;
 		for(i = 1; i <= done[0].pid; i++){
 			if(done[i].pid == my.pid){
 				my.jetton = done[i].jetton;
@@ -510,8 +511,8 @@ int main(int argc, char* agrv[]) {
 			}
 
 			//action
-			if (x == INQUIRE_MSG) Mate1Action(round, stage);
-			/*
+			//if (x == INQUIRE_MSG) Mate1Action(round, stage);
+			
 			if(x == INQUIRE_MSG){
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
 				if(done[1].bet > mybet)needcall = 1;
@@ -565,7 +566,7 @@ int main(int argc, char* agrv[]) {
 						}
 					}
 				}
-			}*/
+			}
 		}
 	}
 
