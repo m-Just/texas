@@ -35,7 +35,7 @@ int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 	if (fd != -1) printf("Connection established.\n");
 	else { printf("Connection failure. Program Abort.\n"); exit(1); }
 
-	char tmp[20];
+	char tmp[30];
 	strcpy(tmp, "avg_boy need_notify \n");
 	
 	reg(id, fd, tmp);
