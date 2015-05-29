@@ -128,8 +128,9 @@ void compute(int roundNum)
 		int k = RIVER - 1;
 		while (k > 0 && opp[i].bet[roundNum][k] == 0) k--;
 		double lastbet = opp[i].bet[roundNum][k];
-		iterate(&opp[i].avrgBet, lastbet, roundNum);
+		iterate(&opp[i].avrgBet,  (double)lastbet, roundNum);
 		iterate(&opp[i].variance, pow(lastbet - opp[i].avrgBet, 2.0), roundNum);
+		iterate(&opp[i].foldrate, (double)(opp[i].currentAction==FOLD), roundNum);
 		//fprintf(fout, "round: %d id: %d lastbet: %d average: %lf variance: %lf\n", roundNum, opp[i].pid, (int)lastbet, opp[i].avrgBet, opp[i].variance);
 		fprintf(fout, "round: %6d player:%6d", roundNum, opp[i].pid);
 		for (int j = 0; j < RIVER; j++) fprintf(fout, "%7d ", opp[i].bet[roundNum][j]);
