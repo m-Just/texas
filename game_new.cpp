@@ -551,6 +551,9 @@ int main(int argc, char* agrv[]) {
 					double ret = 1.0;
 					for(int i = 1; i <= 8 - plnum; i++)ret *= 0.9;
 					uplim = get_uplim(rel_winrate, my.jetton, mybet);
+#ifdef WRITE_IN_FILE
+				fprintf(fout, "winrate = %d  rel_winrate = %d  mybet = %d  uplim = %d\n\n", &winrate, &rel_winrate, &mybet, &uplim);
+#endif
 					if(rel_winrate * ret > RAISELEVEL){
 						int upraise = get_raise(round, done[1].bet, uplim);
 						if(upraise >= leastraise)action(RAISE, upraise, fd), leastraise = upraise, mybet = done[1].bet + upraise;
