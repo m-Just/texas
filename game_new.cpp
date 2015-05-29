@@ -349,10 +349,10 @@ int get_raise(int stage, int stagenum, int round, int nowbet, int mostbet)
 		if(done[i].pid == button.pid)f = 1;
 		if(f == 0 || stagenum > 1){
 			if(done[i].pid != my.pid){
-				upfol = estFold(done[i].pid, com, com[0], stage, round);
+				upfol = estFold(done[i].pid, com + 1, com[0], stage, round);
 			}
 		}else{
-			if(stage > 2)upfol = estFold(done[i].pid, com, stage + 1, stage - 1, round);
+			if(stage > 2)upfol = estFold(done[i].pid, com + 1, stage + 1, stage - 1, round);
 			else upfol = 0;
 		}
 		if(upfol == 0)upfol = leastraise + nowbet;
@@ -541,9 +541,9 @@ int main(int argc, char* agrv[]) {
 					for(i = 1; i <= done[0].pid; i++){
 						if(done[i].pid == button.pid)f = 1;
 						int tmp = -1;
-						if(f == 0 || stagenum > 1)tmp = estHand(done[i].pid, com, com[0], stage, round);
+						if(f == 0 || stagenum > 1)tmp = estHand(done[i].pid, com + 1, com[0], stage, round);
 						else{
-							if(stage > 2)tmp = estHand(done[i].pid, com, com[0], stage - 1, round);
+							if(stage > 2)tmp = estHand(done[i].pid, com + 1, com[0], stage - 1, round);
 						}
 						if(tmp != -1 && tmp != 0){
 							double pos = REL_WINRATE_POS;
