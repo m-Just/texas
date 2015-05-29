@@ -36,15 +36,9 @@ int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 	if (fd != -1) printf("Connection established.\n");
 	else { printf("Connection failure. Program Abort.\n"); exit(1); }
 
-<<<<<<< HEAD
-	reg(id, fd, "avg_boy need_notify \n");
-	read_pre_flop(pre_flop_rate[1], pre_flop_rate[0]);
-=======
 	char tmp[30];
-	strcpy(tmp, "avg_boy need_notify \n");
-	
+	strcpy(tmp, "hdbdl need_notify \n");
 	reg(id, fd, tmp);
->>>>>>> f7db2980f2b5f974be76adc49dba2ab7046be519
 	return 1;
 }
 
