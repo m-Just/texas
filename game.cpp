@@ -1,44 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "socket.h"
 #include "constant.h"
 #include "conversion.h"
 #include "opponent.h"
 #include "Card.h"
+#include<algorithm>
 #include<string.h>
-
-#ifdef TEST
+using namespace std;
 #include <time.h>
-#endif
-
-extern ANAOPP opp[];
-
-int fd;// socket id code
 
 struct player
 {
 	int pid, jetton, money;
 }button, sblind, bblind, nor[10], my;//nor[0].pid is the number of other players.
 //nor: other players.
-
-int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
-{
-	char* serverName;
-	char* hostName;
-	unsigned short serverPort, hostPort, id;
-	serverName = agrv[1];
-	serverPort = atoi(agrv[2]);
-	hostName = agrv[3];
-	hostPort = atoi(agrv[4]);
-	id = atoi(agrv[5]);
-	fd = establishConnection(serverName, serverPort, hostName, hostPort);
-
-	if (fd != -1) printf("Connection established.\n");
-	else { printf("Connection failure. Program Abort.\n"); exit(1); }
-
-	reg(id, fd, "hdbdl need notify \n");
-	return 1;
-}
 
 //read part-----------------------------------------------------------------------------
 int hold[5], com[10];
@@ -53,36 +30,72 @@ struct player_rank
 	int pid;
 	int hold[5];
 	int nut_hand;
-}rank[10];//rank[0].pid is player number.
+}rank[10];//rank[0].pid is player number. rank[0].nut_hand is the biggest nut_hand
 
 struct pot_win
 {
 	int pid, num;
 }win[10];//win[0].pid is player number.
 
+extern ANAOPP opp[];
 int plnum = 0; //player number
 int pot = 0;
+int fd;// socket id code
+double pre_flop_rate[2][MAX_PLAYER_NUM + 1][52][52]; //win rate of pre_flop [0]the draw the , [1]the win rate
+int stage_minus = 0; //stage_minus == 1 means that the information may be from the last stage. 
+int stage;
 
-void Mate1Action(int round)
+int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 {
-#ifdef TEST
+	char* serverName;
+	char* hostName;
+	char tmp[30];
+	unsigned short serverPort, hostPort, id;
+	serverName = agrv[1];
+	serverPort = atoi(agrv[2]);
+	hostName = agrv[3];
+	hostPort = atoi(agrv[4]);
+	id = atoi(agrv[5]);
+	fd = establishConnection(serverName, serverPort, hostName, hostPort);
+
+	if (fd != -1) printf("Connection established.\n");
+	else { printf("Connection failure. Program Abort.\n"); exit(1); }
+
+
+	strcpy(tmp, PNAME);
+	reg(id, fd, tmp);
+	return 1;
+}
+
+void Mate1Action(int round, int stage)
+{
 	double avrg = 0;
-	const int AVGC = 2;
+	const double AVGC = 1.6;
+	double draw_line = 1.0 / plnum;
 	rate R;
-	if (com[0] >= 3) R = win_rate(hold + 1, com + 1, com[0], plnum); else R = make_pair(0.125, 0);
-	double win = R.second;
+	if (com[0] >= 3) R = win_rate(hold + 1, com + 1, com[0], plnum); 
+	else
+	{
+		R.first = pre_flop_rate[0][plnum][hold[1]][hold[2]];
+		R.second = pre_flop_rate[1][plnum][hold[1]][hold[2]];
+	}
 	int maxbet = 0;
 	for (int i = 0; i < 8; i++)
 	{
 		avrg += opp[i].avrgBet * (opp[i].jetton[round - 1] + opp[i].money[round - 1]);
-		maxbet = max(maxbet, opp[i].lastbet[round]);
-		if (round > 0)printf("round: %d id: %d money: %d jetton: %d average bet: %lf last bet: %d\n", round - 1, opp[i].pid, opp[i].money[round - 1], opp[i].jetton[round - 1], opp[i].avrgBet, opp[i].lastbet[round - 1]);
+		maxbet = max(maxbet, opp[i].bet[round][stage - 1]);
 	}
-	printf("\n");
 	avrg /= 28000;
-	int mebet = (int)(avrg * win * AVGC);
-	if (round < 10 || maxbet > mebet) action(FOLD, 0, fd); else action(RAISE, (int)(mebet - maxbet), fd);
+	int mebet = (int)(avrg * pow(2.0 ,(R.second - draw_line * 1.5) / draw_line * 3));
+	if (round < 10) mebet = 0;
+#ifdef _TEST
+	printf("/*********round : %d ***********/", round);
+	printf("player: %d\n", plnum);
+	print_Card(hold + 1, 2, "hold");
+	print_Card(com + 1, com[0], "public card");
+	printf("average:%.0lf draw: %lf win: %lf maxbet: %7d mebet:%7d\n", avrg, R.first, R.second, maxbet, mebet);
 #endif
+	if (maxbet > mebet) action(FOLD, 0, fd); else action(RAISE, (int)(mebet - maxbet), fd);
 }
 
 int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:common cards  7:showdown  8:pot-win  9:notify
@@ -180,7 +193,7 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 	}
 	if(strcmp(msg, "showdown/") == 0){
 		while(strcmp(msg, "/common") != 0)get_word(msg, fd);
-		rank[0].pid = 0;
+		rank[0].pid = 0; rank[0].nut_hand = 0;
 		while(1){
 			get_word(msg, fd);
 			if(strcmp(msg, "/showdown") == 0)return 7;
@@ -206,6 +219,7 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 				if(strcmp(msg, "FULL_HOUSE") == 0)rank[x].nut_hand = 7;
 				if(strcmp(msg, "FOUR_OF_A_KIND") == 0)rank[x].nut_hand = 8;
 				if(strcmp(msg, "STRAIGHT_FLUSH") == 0)rank[x].nut_hand = 9;
+				rank[0].nut_hand = max(rank[0].nut_hand, rank[x].nut_hand);
 			}
 		}
 	}
@@ -254,7 +268,7 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 //read part-----------------------------------------------------------------------------
 
 //main logic part--------------------------------------------------------------
-int leastraise, mybet;
+int leastraise, mybet, curbet, lastbet;
 
 int get_uplim(double winrate, int jet, int mybet)
 {
@@ -328,21 +342,20 @@ bool cmp(getraise a, getraise b)
 	return a.up < b.up;
 }
 
-int get_raise(int stage, int stagenum, int round, int nowbet, int mostbet)
+int get_raise(int round, int nowbet, int mostbet)
 {
 	int follow = 0, f = 0, upfol;
 	getraise ret[10];
 	ret[0].pid = 0;
 	for(int i = 1; i <= done[0].pid; i++){
-		if(done[i].pid == button.pid)f = 1;
-		if(f == 0 || stagenum > 1){
-			if(done[i].pid != my.pid){
-				upfol = estFold(done[i].pid, com, com[0], stage, round);
-			}
-		}else{
-			if(stage > 2)upfol = estFold(done[i].pid, com, stage + 1, stage - 1, round);
-			else upfol = 0;
+		if (stage_minus && f){
+			if (stage > 2)upfol = estFold(done[i].pid, com + 1, stage + 1, stage - 1, round);
+			else upfol = 0;	
 		}
+		else{
+			if (done[i].pid != my.pid) upfol = estFold(done[i].pid, com + 1, com[0], stage, round);
+		}
+		if (done[i].pid == sblind.pid) f = 1;
 		if(upfol == 0)upfol = leastraise + nowbet;
 		if(upfol == -1)upfol = 2147483647;
 		ret[0].pid++;
@@ -360,7 +373,7 @@ int get_raise(int stage, int stagenum, int round, int nowbet, int mostbet)
 				if(done[k].pid == ret[i].pid){
 					id = k; break;
 				}
-			tmp += ret[i].up - done[id],bet;
+			tmp += ret[i].up - done[id].bet;
 		}
 		if(tmp > maxn)maxn = tmp, ans = ret[i].up - nowbet;
 	}
@@ -371,19 +384,19 @@ int get_raise(int stage, int stagenum, int round, int nowbet, int mostbet)
 //main logic part--------------------------------------------------------------
 
 //before action--------------------------------------------------------------------
-void pre_action(int x, int *stage, int *stagenum, int round)
+void pre_action(int x, int round)
 {
 	//get stage and init(leastraise)
-	if(x == BLIND_MSG)*stage = PREFLOP, *stagenum = 0, leastraise = BIG_BLIND;
-	if(x == HOLD_MSG)leastraise = BIG_BLIND;
+	stage_minus = 0;
+	if(x == BLIND_MSG)stage = PREFLOP, leastraise = BIG_BLIND;
+	if(x == HOLD_MSG) stage = PREFLOP, leastraise = BIG_BLIND;
 	if(x == COM_CARDS_MSG){
-		if(com[0] == 3)*stage = FLOP;
-		if(com[0] == 4)*stage = TURN;
-		if(com[0] == 5)*stage = RIVER;
-		*stagenum = 0;
+		if(com[0] == 3) stage = FLOP;
+		if(com[0] == 4) stage = TURN;
+		if(com[0] == 5) stage = RIVER;
+		stage_minus = 1;
 		leastraise = BIG_BLIND;
 	}
-	if(x == SHOW_MSG || x == POT_MSG)*stage = POT_WIN, *stagenum = 0;
 	//get stage and init(leastraise)
 	
 	
@@ -421,30 +434,35 @@ void pre_action(int x, int *stage, int *stagenum, int round)
 			opp[i].jetton[round] = nor[j].jetton;
 		}
 	}
+	if(x == BLIND_MSG){
+		curbet = BIG_BLIND;
+		lastbet = 0;
+	}
 	if(x == INQUIRE_MSG || x == NOTIFY_MSG){
 		int i;
 		int f = 0;
-		*stagenum++;
+		for(i = 1; i <= done[0].pid; i++)
+			if(done[i].bet > curbet)lastbet = curbet, curbet = done[i].bet;
+			else if(done[i].bet < curbet && done[i].bet > lastbet)lastbet = done[i].bet;
+
 		for(i = 1; i <= done[0].pid; i++){
 			if(done[i].pid == my.pid){
 				my.jetton = done[i].jetton;
 				my.money = done[i].money;
 				mybet = done[i].bet;
 			}
-			if(done[i].pid == button.pid)f = 1;
-			if(f == 0 || *stagenum > 1){
+			if(stage_minus == 1 && f == 1){
 				int bet = done[i].bet;
-				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, *stage, round);
-			}else{
+				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage - 1, round);
+			}
+			else{
 				int bet = done[i].bet;
-				if(*stage > 1)updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, *stage - 1, round);
-				else updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, *stage, round);
+				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage, round);
 			}
-			if(done[i].action == RAISE && done[i].pid != my.pid){
-				if(leastraise < done[i].bet - done[i + 1].bet)
-					leastraise = done[i].bet - done[i + 1].bet;
-			}
+			if(done[i].pid == sblind.pid)f = 1;
 		}
+		if(leastraise < curbet - lastbet)leastraise = curbet - lastbet;
+		stage_minus = 0;
 	}
 	if(x == SHOW_MSG){
 		int i;
@@ -463,6 +481,7 @@ int main(int argc, char* agrv[]) {
 #endif
 	
 	ConnectAndReg(argc, agrv);
+	read_pre_flop(pre_flop_rate[1], pre_flop_rate[0]);
 
 	my.pid = atoi(agrv[5]);
 	my.jetton = START_JETTON;
@@ -486,8 +505,7 @@ int main(int argc, char* agrv[]) {
 			}
 					
 			//pre action
-			pre_action(x, &stage, &stagenum, round);
-			if (x == INQUIRE_MSG) Mate1Action(round);
+			pre_action(x, round);
 			if (x == POT_MSG)
 			{
 				compute(round);
@@ -495,62 +513,77 @@ int main(int argc, char* agrv[]) {
 			}
 
 			//action
+			//if (x == INQUIRE_MSG) Mate1Action(round, stage);
+			
 			if(x == INQUIRE_MSG){
+				/*
+#ifdef WRITE_IN_FILE
+				fprintf(fout, "com[0] = %d  stage = %d\n\n", &com[0], &stage);
+#endif
+*/
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
-				if(done[1].bet > mybet)needcall = 1;
+				if(curbet > mybet)needcall = 1;
+				else needcall = 0;
 				double winrate;
 				if(stage == 1){//before flop
-					Card pubc[6], handc[3];
-					change_to_Card(pubc, handc, hold, com);
-					winrate = win_rate(handc, pubc, com[0], plnum).second;	
+					winrate = pre_flop_rate[1][plnum][hold[1]][hold[2]];	
 					uplim = get_uplim(winrate, my.jetton, mybet);
-					if(needcall == 0)action(CHECK, 0, fd);
-					else{
-						if(done[1].bet > uplim)action(FOLD, 0, fd);
-						else action(CALL, 0, fd);
+					
+#ifdef WRITE_IN_FILE
+				fprintf(fout, "winrate = %d  mybet = %d  uplim = %d\n\n", &winrate, &mybet, &uplim);
+#endif
+
+					int raisebet = (rnd(winrate*plnum) - 1) * BIG_BLIND;
+					if (raisebet+mybet <= curbet || raisebet > uplim) {
+						if(needcall == 0) action(CHECK, 0, fd);
+						else {
+							if(curbet > uplim) action(FOLD, 0, fd);
+							else { action(CALL, 0, fd); mybet = curbet; }
+						}
 					}
-				}
+					else{
+						action(RAISE, (raisebet+mybet)/curbet*curbet-mybet, fd);  // raise before flop
+						if(leastraise < (raisebet+mybet)/curbet*curbet-mybet)leastraise = (raisebet+mybet)/curbet*curbet-mybet;
+					}
+				}else action(FOLD, 0, fd);
 				if(stage >= 2){
 					int f = 0;
 					double rel_winrate;
-					Card pubc[6], handc[3];
-					change_to_Card(pubc, handc);
-					winrate = win_rate(handc, pubc, com[0], plnum).second;
+					winrate = win_rate(hold + 1, com + 1, com[0], plnum).second;
 					rel_winrate = winrate;
 					int hold_poker = get_handnut();//present nut hand
 					for(i = 1; i <= done[0].pid; i++){
-						if(done[i].pid == button.pid)f = 1;
 						int tmp = -1;
-						if(f == 0 || stagenum > 1)tmp = estHand(done[i].pid, com, com[0], stage, round);
-						else{
-							if(stage > 2)tmp = estHand(done[i].pid, com, com[0], stage - 1, round);
-						}
+						if (stage_minus == 1 && f) tmp = estHand(done[i].pid, com + 1, com[0], stage - 1, round);
+						else tmp = estHand(done[i].pid, com + 1, com[0], stage, round);
+						if (done[i].pid == sblind.pid) f = 1;
 						if(tmp != -1 && tmp != 0){
-							double pos = 0.1;
-							if(hold_poker < tmp)pos = -0.1;
-							rel_winrate *= (1 + (0.2 * (hold_poker - tmp) - pos));
+							double pos = REL_WINRATE_POS;
+							if(hold_poker < tmp)pos = -REL_WINRATE_POS;
+							rel_winrate *= (1 + (REL_WINRATE_MULT * (hold_poker - tmp) - pos));
 						}
 					}
 					double ret = 1.0;
 					for(int i = 1; i <= 8 - plnum; i++)ret *= 0.9;
 					uplim = get_uplim(rel_winrate, my.jetton, mybet);
-					if(rel_winrate * ret > 0.35){
-						int tmp = my.jetton / 4;
-						if(uplim < tmp)tmp = uplim;
-						int upraise = get_raise(stage, stagenum, round, done[1].bet, tmp);
-						if(upraise >= leastraise)action(RAISE, upraise, fd);
+#ifdef WRITE_IN_FILE
+				fprintf(fout, "winrate = %d  rel_winrate = %d  mybet = %d  uplim = %d\n\n", &winrate, &rel_winrate, &mybet, &uplim);
+#endif
+					if(rel_winrate * ret > RAISELEVEL){
+						int upraise = get_raise(round, curbet, uplim);
+						if(upraise >= leastraise)action(RAISE, upraise, fd), leastraise = upraise, mybet = curbet + upraise, lastbet = curbet, curbet = mybet;
 						else{
 							if(needcall == 0)action(CHECK, 0, fd);
 							else{
-								if(done[1].bet > uplim)action(FOLD, 0, fd);
-								else action(CALL, 0, fd);
+								if(curbet > uplim)action(FOLD, 0, fd);
+								else action(CALL, 0, fd), mybet = curbet;
 							}
 						}
 					}else{
 						if(needcall == 0)action(CHECK, 0, fd);
 						else{
-							if(done[1].bet > uplim)action(FOLD, 0, fd);
-							else action(CALL, 0, fd);
+							if(curbet > uplim)action(FOLD, 0, fd);
+							else action(CALL, 0, fd), mybet = curbet;
 						}
 					}
 				}
