@@ -8,8 +8,7 @@
 
 ANAOPP opp[MAX_PLAYER_NUM];
 
-void oppclear()
-{
+void oppclear() {
 	memset(opp, 0, sizeof(opp));
 }
 
@@ -31,7 +30,7 @@ void iterate(double* value, double change, int roundNum) {
 
 double coco(int* x, int* y, int ini_i, int steplen, int stepsize, int totallen) { // Correlation Coefficient (-1~1)
 	int i, j, cnt = 0, yistmp = 0;
-	if (totallen < steplen + stepsize) return 1;
+	if (totallen < steplen + stepsize) return 1; // not enough data, return default value 1.
 	if (y == NULL) {
 		y = (int*)malloc(sizeof(int)*totallen); yistmp = 1;
 		for (i = ini_i; i < ini_i+totallen; i++) if (x[i]) y[i] = i;
@@ -57,9 +56,12 @@ double coco(int* x, int* y, int ini_i, int steplen, int stepsize, int totallen) 
 		yd    += pow(ya[i]-yaa, 2.0);
 	}
 
-	if (xd && yd) 
-		return upper/sqrt(xd*yd);
-	else	return 1;    // return 1 for absolute linear correlation
+	double result;
+	if (xd != 0 && yd != 0) {
+		result = upper/sqrt(xd*yd);
+		if (fabs(result) <= 1) return result;
+		else { printf("Invalid value of coco:%lf\n", result); return 1; } // error, return default value 1.
+	} else return 1;    // return 1 for absolute linear correlation
 }
 
 // update after every inquire, notify(if available), showdown and pot-win message
@@ -73,41 +75,40 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	//fprintf(fout, "id: %7d action: %7d num: %7d stage: %7d roundNum: %7d\n", id, action, num, stage, roundNum);
 #endif
 	int i = hash(id); int j;
+	int* b = &opp[i].bet[roundNum][stage-1];
+	/* basic update */
 	opp[i].currentAction = action;
 	opp[i].currentStage  = stage;
+	opp[i].cc = coco(opp[i].lastbet, opp[i].jetton, 0, 20, 10, roundNum-1);
 	if (m 	!= -1) opp[i].money[roundNum]  = m;     /* notice: the value of "m" and "jet" is the last value received from the server */
 	if (jet != -1) opp[i].jetton[roundNum] = jet;
-	int* b = &opp[i].bet[roundNum][stage-1];
 
-	if 	(action == QUIT || action == CHECK) *b = num;
-	else if (action == CALL || action == RAISE) *b = num;
-	else if (action == ALLIN) *b = num;
-	else if (action == FOLD)  { *b = num; opp[i].hand[roundNum] = NA; }
-	else if (action == BLIND) *b = num;
-	else if (action == SHOW) {
+	if (action == SHOW) {
 		opp[i].hand[roundNum] = num%10; // num := best_hand*10+nut_hand
 		/* bluff detection */
-		if (roundNum >= bluff_detection_start_roundNum)
+		if (roundNum >= bluff_detection_start_roundNum)   // general detection
 			if (opp[i].hand[roundNum]+2 <= num/10 && opp[i].bet[roundNum][RIVER-1] > opp[i].avrgBet*(1.0+opp[i].foldrate))
 				opp[i].style = BLUFF;
-		for (j = 1; j <= STRAIGHT_FLUSH-opp[i].hand[roundNum]; j++)
+		for (j = 1; j <= STRAIGHT_FLUSH-opp[i].hand[roundNum]; j++) {  // special detection
 			if (opp[i].maxbet[opp[i].hand[roundNum]+j] && opp[i].bet[roundNum][RIVER-1] >
 			    jettonPara(id, stage, roundNum, opp[i].maxbetRound[opp[i].hand[roundNum]+j])*opp[i].maxbet[opp[i].hand[roundNum]+j]) {
 				opp[i].style = BLUFF; break;
 			}
+		}
 
-		if (opp[i].style != BLUFF)
+		// unfinished: check if the estHand() is right. if not, re-analyse and considering style changing.
+
+		if (opp[i].style != BLUFF) {  // update for maxbet and maxbetRound
 			if (opp[i].maxbet[num] < opp[i].bet[roundNum][RIVER-1]) {
 				opp[i].maxbet[num] = opp[i].bet[roundNum][RIVER-1];
 				opp[i].maxbetRound[num] = roundNum;
 			}
-	}
-	else printf("Error: Invalid action#%d by player#%d at round#%d!\n", action, id, roundNum+1);
+		}
+	} else { *b = num; opp[i].hand[roundNum] = NA; }
 	
 	if (opp[i].maxbet[0] < *b) { opp[i].maxbet[0] = *b; opp[i].maxbetRound[0] = roundNum; }
 
-	if (action == FOLD || action == SHOW) opp[i].lastbet[roundNum] = *b;
-
+	/* style analysis */
 	if (roundNum > 0 && !(roundNum%10) && opp[i].style != BLUFF) {
 		if 	(opp[i].avrgBet < 2*BIG_BLIND) opp[i].style = TIGHT;
 		else if (opp[i].avrgBet < 5*BIG_BLIND) opp[i].style = NORMAL;
@@ -117,35 +118,24 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 #ifdef TEST
 	fclose(fout);
 #endif
-	// check if the estimate() is right. if not, re-analyse and considering bluff-playing.
 }
 
-void compute(int roundNum)
-{
+void compute(int roundNum) {
 #ifdef TEST
 	FILE *fout = fopen("compute.txt", "a");
 #endif
-	for (int i = 0; i < 8; i++) if (opp[i].money > 0)
-	{
+	for (int i = 0; i < 8; i++) if (opp[i].money > 0) {
 		int k = RIVER - 1;
 		while (k > 0 && opp[i].bet[roundNum][k] == 0) k--;
 		double lastbet = opp[i].bet[roundNum][k];
 		opp[i].lastbet[roundNum] = (int)lastbet;
 		iterate(&opp[i].avrgBet, lastbet, roundNum);
 		iterate(&opp[i].variance, pow(lastbet - opp[i].avrgBet, 2.0), roundNum);
-		//fprintf(fout, "round: %d id: %d lastbet: %d average: %lf variance: %lf\n", roundNum, opp[i].pid, (int)lastbet, opp[i].avrgBet, opp[i].variance);
-#ifdef TEST		
 		iterate(&opp[i].foldrate, (double)(opp[i].currentAction==FOLD), roundNum);
-#endif
 	}
 #ifdef TEST
 	fclose(fout);
 #endif
-}
-
-int styleAnalyse(int id) {
-	int i = hash(id);
-	// avrgBet, maxbet, foldrate
 }
 
 int patternAnalyse(int id) {
@@ -233,7 +223,7 @@ int estHand(int id, int* card, int cardNum, int stage, int roundNum) { // estima
 	} else
 	if (opp[i].currentAction == RAISE || opp[i].currentAction == CALL)  {
 		if (opp[i].maxbet[potentHand]) {
-			if (betcchand > 0.6)
+			if (betcchand > 0.6) // linear function estimation
 				for (m = potentHand; m <= highestHand; m++)
 					if (b > /*slope*/1.5*(m-potentHand+1)*opp[i].maxbet[potentHand])   // the slope should be further determined
 						return m+(m != STRAIGHT_FLUSH);

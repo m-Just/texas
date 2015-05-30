@@ -38,8 +38,6 @@ double coco(int* x, int* y, int ini_i, int steplen, int stepsize, int totallen);
 
 int updateData(int id, int action, int num, int jet, int m, int stage, int roundNum);
 
-int styleAnalyse(int id);
-
 int patternAnalyse(int id);
 
 double jettonPara(int id, int stage, int roundNum, int maxbetRound);
