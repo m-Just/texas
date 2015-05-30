@@ -11,11 +11,8 @@
 using namespace std;
 #include <time.h>
 
-#define TEST
+//#define TEST
 
-#ifdef TEST
-	FILE * aaa;
-#endif
 	
 
 struct player
@@ -74,7 +71,7 @@ int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 	return 1;
 }
 
-void Mate1Action(int round)
+void Mate1Action(int round, int stage)
 {
 	double avrg = 0;
 	const double AVGC = 1.6;
@@ -309,11 +306,11 @@ int get_uplim(double winrate, int jet, int mybet)
 		}
 	} 
 #ifdef TEST
-				fprintf(aaa, "winrate = %lf  tmp = %d\n\n", winrate, tmp);
+				printf("winrate = %lf  tmp = %d\n\n", winrate, tmp);
 #endif
 	double para = 1.0;
-	//if((double)jet/START_JETTON < 1.0)para = (double)jet/START_JETTON;
-	int ans = ((double)tmp * winrate * para) / (1.0 - pow(winrate, (9.0 - (double)plnum)/10.0) * para) + 0.5;
+	if((double)jet/START_JETTON < 1.0)para = (double)jet/START_JETTON;
+	int ans = ((double)tmp * winrate * para) / (1.0 - pow(winrate, (11.0 - (double)plnum)/10.0) * para) + 0.5;
 	return ans;
 	//(tmp + n) * winrate * jet/START_JETTON = n
 	//tmp*r*para = - n*r*para + n
@@ -489,9 +486,6 @@ int main(int argc, char* agrv[]) {
 	FILE * fout = freopen("melog.txt", "w", stdout);
 #endif
 
-#ifdef TEST
-	aaa = fopen("melog1.txt", "w");
-#endif
 
 	ConnectAndReg(argc, agrv);
 	read_pre_flop(pre_flop_rate[1], pre_flop_rate[0]);
@@ -528,8 +522,7 @@ int main(int argc, char* agrv[]) {
 			//action
 			//if (x == INQUIRE_MSG) Mate1Action(round, stage);
 			
-			if(x == INQUIRE_MSG){
-				printf("%d\n", stage);
+			if(x == INQUIRE_MSG){				
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
 				if(curbet > mybet)needcall = 1;
 				else needcall = 0;
@@ -542,20 +535,23 @@ int main(int argc, char* agrv[]) {
 				printf("winrate = %lf  mybet = %d  uplim = %d\n\n", winrate, mybet, uplim);
 #endif
 
-					int raisebet = (rnd(winrate*plnum) - 1) * BIG_BLIND;
-					if (raisebet+mybet <= curbet || raisebet > uplim) {
+			//		int raisebet = (rnd(winrate*plnum) - 1) * BIG_BLIND;
+			//		if (raisebet+mybet <= curbet || raisebet > uplim) {
 						if(needcall == 0) action(CHECK, 0, fd);
 						else {
 							if(curbet > uplim) action(FOLD, 0, fd);
 							else { action(CALL, 0, fd); mybet = curbet; }
 						}
-					}
-					else{
-						action(RAISE, (raisebet+mybet)/curbet*curbet-mybet, fd);  // raise before flop
-						if(leastraise < (raisebet+mybet)/curbet*curbet-mybet)leastraise = (raisebet+mybet)/curbet*curbet-mybet;
-					}
+			//		}
+			//		else{
+			//			action(RAISE, (raisebet+mybet)/curbet*curbet-mybet, fd);  // raise before flop
+			//			if(leastraise < (raisebet+mybet)/curbet*curbet-mybet)leastraise = (raisebet+mybet)/curbet*curbet-mybet;
+			//		}
 				}else action(FOLD, 0, fd);
 				if(stage >= 2){
+#ifdef TEST
+				printf("stage = %d\n\n", stage);
+#endif
 					int f = 0;
 					double rel_winrate;
 					winrate = win_rate(hold + 1, com + 1, com[0], plnum).second;
@@ -576,7 +572,7 @@ int main(int argc, char* agrv[]) {
 					for(int i = 1; i <= 8 - plnum; i++)ret *= 0.9;
 					uplim = get_uplim(rel_winrate, my.jetton, mybet);
 #ifdef TEST
-				fprintf(aaa, "winrate = %lf  rel_winrate = %d  mybet = %d  uplim = %d\n\n", winrate, rel_winrate, mybet, uplim);
+				printf("winrate = %lf  rel_winrate = %d  mybet = %d  uplim = %d\n\n", winrate, rel_winrate, mybet, uplim);
 #endif
 					if(rel_winrate * ret > RAISELEVEL){
 						int upraise = get_raise(round, curbet, uplim);
@@ -603,9 +599,6 @@ int main(int argc, char* agrv[]) {
 #ifdef WRITE_IN_FILE
 	fclose(fout);
 #endif
-#ifdef TEST
-	fclose(aaa);
-#endif
+
 	return 0;
 }
-
