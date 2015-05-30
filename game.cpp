@@ -304,7 +304,7 @@ int get_uplim(double winrate, int jet, int mybet)
 	} 
 	double para = 1.0;
 	if((double)jet/START_JETTON < 1.0)para = (double)jet/START_JETTON;
-	int ans = ((double)tmp * winrate * para) / (1.0 - winrate * para) + 0.5;
+	int ans = ((double)tmp * winrate * para) / (1.0 - pow(winrate, (9.0 - (double)plnum)/10.0) * para) + 0.5;
 	return ans;
 	//(tmp + n) * winrate * jet/START_JETTON = n
 	//tmp*r*para = - n*r*para + n
