@@ -31,11 +31,11 @@ int establishConnection(char* serverName, unsigned short serverPort, char* hostN
 
 	printf("Setting up socket...\n");
 	s = socket(AF_INET, SOCK_STREAM, 0);
-	//setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
+	setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 	bind(s, (struct sockaddr*) &sh, sizeof(struct sockaddr_in));
-	while (bind(s, (struct sockaddr*) &sh, sizeof(struct sockaddr_in))) {
-		printf("Socket bind failure. Retrying...\n");
-	}
+	//while (bind(s, (struct sockaddr*) &sh, sizeof(struct sockaddr_in))) {
+	//	printf("Socket bind failure. Retrying...\n");
+	//}
 
 	int i;
 	while(1) {

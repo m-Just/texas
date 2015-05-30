@@ -85,7 +85,7 @@ void Mate1Action(int round)
 	int maxbet = 0;
 	for (int i = 0; i < 8; i++)
 	{
-		avrg += opp[i].avrgBet * (opp[i].jetton[round - 1] + opp[i].money[round - 1]);
+		avrg +=min(opp[i].avrgBet, my.jetton) * (opp[i].jetton[round - 1] + opp[i].money[round - 1]);
 		maxbet = max(maxbet, opp[i].bet[round][stage - 1]);
 	}
 	avrg /= 28000;

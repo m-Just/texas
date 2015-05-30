@@ -9,6 +9,7 @@
 #include<stdlib.h>
 using namespace std;
 #define randomcount 30
+#define TESTNUM 1e5
 
 rate make_pair(double x1, double x2)
 {
@@ -46,6 +47,7 @@ rate dfs(bool flag[][14], const Card hand_card[], Card public_card[], const int 
 			int tmp;
 			do tmp = rand() % 52; while (f1[tmp]);
 			f1[tmp] = 1;
+			randomnum[i] = tmp;
 		}
 
 
@@ -137,4 +139,10 @@ void read_pre_flop(double win[][52][52], double draw[][52][52])
 	}
 
 	fclose(fin);
+}
+
+rate win_rate_byrandom(const int hand_card[], int public_card[], const int &public_card_number, const int &player_number)
+{
+	srand(time(0));
+
 }
