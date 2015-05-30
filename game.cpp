@@ -50,7 +50,7 @@ int pot = 0;
 int fd;// socket id code
 double pre_flop_rate[2][MAX_PLAYER_NUM + 1][52][52]; //win rate of pre_flop [0]the draw the , [1]the win rate
 int stage_minus = 0; //stage_minus == 1 means that the information may be from the last stage. 
-int stage1;
+int stage;
 
 int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 {
@@ -74,7 +74,7 @@ int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 	return 1;
 }
 
-void Mate1Action(int round, int stage)
+void Mate1Action(int round)
 {
 	double avrg = 0;
 	const double AVGC = 1.6;
@@ -358,11 +358,11 @@ int get_raise(int round, int nowbet, int mostbet)
 	ret[0].pid = 0;
 	for(int i = 1; i <= done[0].pid; i++){
 		if (stage_minus && f){
-			if (stage1 > 2)upfol = estFold(done[i].pid, com + 1, stage1 + 1, stage1 - 1, round);
+			if (stage > 2)upfol = estFold(done[i].pid, com + 1, stage + 1, stage - 1, round);
 			else upfol = 0;	
 		}
 		else{
-			if (done[i].pid != my.pid) upfol = estFold(done[i].pid, com + 1, com[0], stage1, round);
+			if (done[i].pid != my.pid) upfol = estFold(done[i].pid, com + 1, com[0], stage, round);
 		}
 		if (done[i].pid == sblind.pid) f = 1;
 		if(upfol == 0)upfol = leastraise + nowbet;
@@ -397,12 +397,12 @@ void pre_action(int x, int round)
 {
 	//get stage and init(leastraise)
 	stage_minus = 0;
-	if(x == BLIND_MSG)stage1 = PREFLOP, leastraise = BIG_BLIND;
-	if(x == HOLD_MSG) stage1 = PREFLOP, leastraise = BIG_BLIND;
+	if(x == BLIND_MSG)stage = PREFLOP, leastraise = BIG_BLIND;
+	if(x == HOLD_MSG) stage = PREFLOP, leastraise = BIG_BLIND;
 	if(x == COM_CARDS_MSG){
-		if(com[0] == 3) stage1 = FLOP;
-		if(com[0] == 4) stage1 = TURN;
-		if(com[0] == 5) stage1 = RIVER;
+		if(com[0] == 3) stage = FLOP;
+		if(com[0] == 4) stage = TURN;
+		if(com[0] == 5) stage = RIVER;
 		stage_minus = 1;
 		leastraise = BIG_BLIND;
 	}
@@ -462,11 +462,11 @@ void pre_action(int x, int round)
 			}
 			if(stage_minus == 1 && f == 1){
 				int bet = done[i].bet;
-				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage1 - 1, round);
+				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage - 1, round);
 			}
 			else{
 				int bet = done[i].bet;
-				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage1, round);
+				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage, round);
 			}
 			if(done[i].pid == sblind.pid)f = 1;
 		}
@@ -501,7 +501,7 @@ int main(int argc, char* agrv[]) {
 	my.money = START_MONEY;
 
 	/* main round loop */
-	int round, stage, stagenum;
+	int round;
 	for (round = 0; round < MAX_ROUND; round++) {
 		mybet = 0;
 		leastraise = BIG_BLIND;
@@ -529,8 +529,7 @@ int main(int argc, char* agrv[]) {
 			//if (x == INQUIRE_MSG) Mate1Action(round, stage);
 			
 			if(x == INQUIRE_MSG){
-
-
+				printf("%d\n", stage);
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
 				if(curbet > mybet)needcall = 1;
 				else needcall = 0;
@@ -540,7 +539,7 @@ int main(int argc, char* agrv[]) {
 					uplim = get_uplim(winrate, my.jetton, mybet);
 					
 #ifdef TEST
-				fprintf(aaa, "winrate = %lf  mybet = %d  uplim = %d\n\n", winrate, mybet, uplim);
+				printf("winrate = %lf  mybet = %d  uplim = %d\n\n", winrate, mybet, uplim);
 #endif
 
 					int raisebet = (rnd(winrate*plnum) - 1) * BIG_BLIND;
@@ -609,3 +608,4 @@ int main(int argc, char* agrv[]) {
 #endif
 	return 0;
 }
+
