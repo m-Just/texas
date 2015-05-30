@@ -5,7 +5,10 @@
 #include"Card.h"
 #include<string.h>
 #include"constant.h"
+#include<time.h>
+#include<stdlib.h>
 using namespace std;
+#define randomcount 35
 
 rate make_pair(double x1, double x2)
 {
@@ -32,11 +35,25 @@ rate dfs(bool flag[][14], const Card hand_card[], Card public_card[], const int 
 		Card7 c7, tc7;
 		static pair<int, int> rank[3000];
 		int cnt = 0;
+		
+		
+		static int randomnum[randomcount];
+		bool f1[52];
+		memset(f1, 0, sizeof(f1));
+		srand(time(0));
+		for (int i = 0; i < randomcount; i++)
+		{
+			int tmp;
+			do tmp = rand() % 52; while (f1[tmp]);
+			f1[tmp] = 1;
+		}
+
 
 		for (int i = 0; i < 5; i++) c7.card[i] = public_card[i];
-		for (int i = 0; i < 52; i++)
-			for (int j = 0; j < i; j++)
+		for (int i1 = 0; i1 < randomcount; i1++)
+			for (int j1 = 0; j1 < i1; j1++)
 			{
+				int i = randomnum[i1], j = randomnum[j1];
 				c7.card[5] = int2card(i);
 				c7.card[6] = int2card(j);
 				if (flag[c7.card[5].color][c7.card[5].val] || flag[c7.card[6].color][c7.card[6].val]) continue;
