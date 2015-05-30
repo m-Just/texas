@@ -122,6 +122,7 @@ void reg(int num, int fd, char* name_and_notify)
 	strrev(num1);
 	strcpy(msg, "reg: ");
 	strcat(msg, num1);
+	strcat(msg, " ");
 	strcat(msg, name_and_notify);
 	write(fd, msg, sizeof(msg));
 
