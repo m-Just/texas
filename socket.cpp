@@ -58,12 +58,12 @@ void get_word(char msg[], int fd)
 		while (read(fd, tmp, sizeof(tmp[0])) == 0)
 		{
 			usleep(1000 * 5);
-			printf("Nothing in socket for read!\n");
+			//printf("Nothing in socket for read!\n");
 		}
 		;
 		if (tmp[0] == ' ' || tmp[0] == '\n'){
 			if (flag == 1){
-#ifdef TEST_GET_WORD
+#ifdef _TEST
 				printf("%s\n", msg);
 #endif
 				break;
