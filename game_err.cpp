@@ -469,6 +469,9 @@ void pre_action(int x, int round)
 		}
 		if(leastraise < curbet - lastbet)leastraise = curbet - lastbet;
 		stage_minus = 0;
+#ifdef WRITE_IN_FILE
+				printf("x = %d stage = %d\n\n", x, stage);
+#endif
 	}
 	if(x == SHOW_MSG){
 		int i;
@@ -476,6 +479,9 @@ void pre_action(int x, int round)
 			updateData(rank[i].pid, SHOW, rank[0].nut_hand*10+rank[i].nut_hand, -1, -1, POT_WIN, round);
 		}
 	}
+#ifdef WRITE_IN_FILE
+				printf("x = %d stage = %d\n\n", x, stage);
+#endif
 }
 //before action--------------------------------------------------------------------
 
@@ -512,11 +518,17 @@ int main(int argc, char* agrv[]) {
 					
 			//pre action
 			pre_action(x, round);
+#ifdef WRITE_IN_FILE
+				printf("x = %d stage = %d\n\n", x, stage);
+#endif
 			if (x == POT_MSG)
 			{
 				compute(round);
 				break;
 			}
+#ifdef WRITE_IN_FILE
+				printf("x = %d stage = %d\n\n", x, stage);
+#endif
 
 			//action
 			//if (x == INQUIRE_MSG) Mate1Action(round, stage);
