@@ -30,10 +30,10 @@ int establishConnection(char* serverName, unsigned short serverPort, char* hostN
 	sh.sin_addr = host;
 
 	printf("Setting up socket...\n");
-	s = socket(AF_INET, SOCK_STREAM, 0);
+	s = socket(AF_INET, SOCK_STREAM, 0)
 	setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 	while (bind(s, (struct sockaddr*) &sh, sizeof(struct sockaddr_in))) {
-		printf("Socket bind failure. Retrying...\n"); exit(1);
+		printf("Socket bind failure. Retrying...\n");
 	}
 
 	int i;
