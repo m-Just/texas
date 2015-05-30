@@ -11,6 +11,13 @@
 using namespace std;
 #include <time.h>
 
+#define TEST
+
+#ifdef TEST
+	FILE * aaa;
+#endif
+	
+
 struct player
 {
 	int pid, jetton, money;
@@ -43,7 +50,7 @@ int pot = 0;
 int fd;// socket id code
 double pre_flop_rate[2][MAX_PLAYER_NUM + 1][52][52]; //win rate of pre_flop [0]the draw the , [1]the win rate
 int stage_minus = 0; //stage_minus == 1 means that the information may be from the last stage. 
-int stage;
+int stage1;
 
 int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 {
@@ -179,7 +186,6 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 	if(strcmp(msg, "flop/") == 0 || strcmp(msg, "turn/") == 0 || strcmp(msg, "river/") == 0){
 		char col[10];
 		char poi[5];
-		com[0] = 0;
 		while(1){
 			get_word(msg, fd);
 			if(strcmp(msg, "/flop") == 0 || strcmp(msg, "/turn") == 0 || strcmp(msg, "/river") == 0)return 6;
@@ -302,8 +308,11 @@ int get_uplim(double winrate, int jet, int mybet)
 			}else if(pl[i].bet < BIG_BLIND)tmp += BIG_BLIND - pl[i].bet;
 		}
 	} 
+#ifdef TEST
+				fprintf(aaa, "winrate = %lf  tmp = %d\n\n", winrate, tmp);
+#endif
 	double para = 1.0;
-	if((double)jet/START_JETTON < 1.0)para = (double)jet/START_JETTON;
+	//if((double)jet/START_JETTON < 1.0)para = (double)jet/START_JETTON;
 	int ans = ((double)tmp * winrate * para) / (1.0 - pow(winrate, (9.0 - (double)plnum)/10.0) * para) + 0.5;
 	return ans;
 	//(tmp + n) * winrate * jet/START_JETTON = n
@@ -349,11 +358,11 @@ int get_raise(int round, int nowbet, int mostbet)
 	ret[0].pid = 0;
 	for(int i = 1; i <= done[0].pid; i++){
 		if (stage_minus && f){
-			if (stage > 2)upfol = estFold(done[i].pid, com + 1, stage + 1, stage - 1, round);
+			if (stage1 > 2)upfol = estFold(done[i].pid, com + 1, stage1 + 1, stage1 - 1, round);
 			else upfol = 0;	
 		}
 		else{
-			if (done[i].pid != my.pid) upfol = estFold(done[i].pid, com + 1, com[0], stage, round);
+			if (done[i].pid != my.pid) upfol = estFold(done[i].pid, com + 1, com[0], stage1, round);
 		}
 		if (done[i].pid == sblind.pid) f = 1;
 		if(upfol == 0)upfol = leastraise + nowbet;
@@ -388,17 +397,17 @@ void pre_action(int x, int round)
 {
 	//get stage and init(leastraise)
 	stage_minus = 0;
-	if(x == BLIND_MSG)stage = PREFLOP, leastraise = BIG_BLIND;
-	if(x == HOLD_MSG) stage = PREFLOP, leastraise = BIG_BLIND;
+	if(x == BLIND_MSG)stage1 = PREFLOP, leastraise = BIG_BLIND;
+	if(x == HOLD_MSG) stage1 = PREFLOP, leastraise = BIG_BLIND;
 	if(x == COM_CARDS_MSG){
-		if(com[0] == 3) stage = FLOP;
-		if(com[0] == 4) stage = TURN;
-		if(com[0] == 5) stage = RIVER;
+		if(com[0] == 3) stage1 = FLOP;
+		if(com[0] == 4) stage1 = TURN;
+		if(com[0] == 5) stage1 = RIVER;
 		stage_minus = 1;
 		leastraise = BIG_BLIND;
 	}
 	//get stage and init(leastraise)
-	
+
 	
 	if(x == SEAT_MSG && round == 0){
 		int i = 0;
@@ -453,11 +462,11 @@ void pre_action(int x, int round)
 			}
 			if(stage_minus == 1 && f == 1){
 				int bet = done[i].bet;
-				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage - 1, round);
+				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage1 - 1, round);
 			}
 			else{
 				int bet = done[i].bet;
-				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage, round);
+				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage1, round);
 			}
 			if(done[i].pid == sblind.pid)f = 1;
 		}
@@ -479,7 +488,11 @@ int main(int argc, char* agrv[]) {
 #ifdef WRITE_IN_FILE
 	FILE * fout = freopen("melog.txt", "w", stdout);
 #endif
-	
+
+#ifdef TEST
+	aaa = fopen("melog1.txt", "w");
+#endif
+
 	ConnectAndReg(argc, agrv);
 	read_pre_flop(pre_flop_rate[1], pre_flop_rate[0]);
 
@@ -516,11 +529,8 @@ int main(int argc, char* agrv[]) {
 			//if (x == INQUIRE_MSG) Mate1Action(round, stage);
 			
 			if(x == INQUIRE_MSG){
-				/*
-#ifdef WRITE_IN_FILE
-				fprintf(fout, "com[0] = %d  stage = %d\n\n", &com[0], &stage);
-#endif
-*/
+
+
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
 				if(curbet > mybet)needcall = 1;
 				else needcall = 0;
@@ -529,8 +539,8 @@ int main(int argc, char* agrv[]) {
 					winrate = pre_flop_rate[1][plnum][hold[1]][hold[2]];	
 					uplim = get_uplim(winrate, my.jetton, mybet);
 					
-#ifdef WRITE_IN_FILE
-				fprintf(fout, "winrate = %d  mybet = %d  uplim = %d\n\n", &winrate, &mybet, &uplim);
+#ifdef TEST
+				fprintf(aaa, "winrate = %lf  mybet = %d  uplim = %d\n\n", winrate, mybet, uplim);
 #endif
 
 					int raisebet = (rnd(winrate*plnum) - 1) * BIG_BLIND;
@@ -566,8 +576,8 @@ int main(int argc, char* agrv[]) {
 					double ret = 1.0;
 					for(int i = 1; i <= 8 - plnum; i++)ret *= 0.9;
 					uplim = get_uplim(rel_winrate, my.jetton, mybet);
-#ifdef WRITE_IN_FILE
-				fprintf(fout, "winrate = %d  rel_winrate = %d  mybet = %d  uplim = %d\n\n", &winrate, &rel_winrate, &mybet, &uplim);
+#ifdef TEST
+				fprintf(aaa, "winrate = %lf  rel_winrate = %d  mybet = %d  uplim = %d\n\n", winrate, rel_winrate, mybet, uplim);
 #endif
 					if(rel_winrate * ret > RAISELEVEL){
 						int upraise = get_raise(round, curbet, uplim);
@@ -593,6 +603,9 @@ int main(int argc, char* agrv[]) {
 
 #ifdef WRITE_IN_FILE
 	fclose(fout);
+#endif
+#ifdef TEST
+	fclose(aaa);
 #endif
 	return 0;
 }
