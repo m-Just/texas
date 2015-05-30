@@ -29,8 +29,8 @@ rate dfs(bool flag[][14], const Card hand_card[], Card public_card[], const int 
 	}
 	if (public_card_number == 5)
 	{
-		Card7 c7;
-		static Card7 c7_in_order[3000];
+		Card7 c7, tc7;
+		static pair<int, int> rank[3000];
 		int cnt = 0;
 
 		for (int i = 0; i < 5; i++) c7.card[i] = public_card[i];
@@ -40,20 +40,21 @@ rate dfs(bool flag[][14], const Card hand_card[], Card public_card[], const int 
 				c7.card[5] = int2card(i);
 				c7.card[6] = int2card(j);
 				if (flag[c7.card[5].color][c7.card[5].val] || flag[c7.card[6].color][c7.card[6].val]) continue;
-				c7_in_order[cnt++] = c7;
-				c7_in_order[cnt - 1].get_level();
+				tc7 = c7;
+				tc7.get_level();
+				rank[cnt++] = make_pair(tc7.level, tc7.level2);
 			}
-		sort(c7_in_order, c7_in_order + cnt);
+		sort(rank, rank + cnt);
 
 		c7.card[5] = hand_card[0];
 		c7.card[6] = hand_card[1];
 		c7.get_level();
 		int left_boundary, right_boundary;
 		left_boundary = 0;
-		while (left_boundary < cnt && c7_in_order[left_boundary].level < c7.level) left_boundary++;
-		while (left_boundary < cnt && c7_in_order[left_boundary].level == c7.level && c7_in_order[left_boundary].level2 < c7.level2) left_boundary++;
+		while (left_boundary < cnt && rank[left_boundary].first < c7.level) left_boundary++;
+		while (left_boundary < cnt && rank[left_boundary].first == c7.level && rank[left_boundary].second < c7.level2) left_boundary++;
 		right_boundary = left_boundary;
-		while (right_boundary < cnt && c7_in_order[right_boundary].level == c7.level && c7_in_order[right_boundary].level2 == c7.level2) right_boundary++;
+		while (right_boundary < cnt && rank[right_boundary].first == c7.level && rank[right_boundary].second == c7.level2) right_boundary++;
 		double win_rate = 1, draw_rate = 1;
 		for (int i = 0; i < player_number - 1; i++) win_rate *= (double)left_boundary / cnt, draw_rate *= (double)right_boundary / cnt;
 		draw_rate = draw_rate - win_rate;
