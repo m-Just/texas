@@ -42,17 +42,18 @@
 #define FLOP    2
 #define TURN    3
 #define RIVER   4 // including pot_win
-#define POT_WIN 5
+#define POT_WIN RIVER
 
 /* Basic Information */  // updated 5.25
-#define MAX_PLAYER_NUM 8
+#define MAX_PLAYER_NUM 8  // including ourself
 #define MAX_ROUND 600
 #define START_MONEY  4000
 #define START_JETTON 2000
 #define BIG_BLIND   40
 #define SMALL_BLIND 20
+#define PNAME "Tiger need_notify\n"
 
-/*Macro for test*/
+/* Macro for test */
 #define TEST
 #define TESTNEW
 #ifdef TEST
@@ -60,7 +61,7 @@
 #endif
 #define max(a, b) ((a) < (b))?(b):(a)
 
-/*Abbr*/
+/* Abbr */
 #define SGI socket_get_int(fd)
 #define IOW get_word(msg, fd) //ignore one word from socket
 
@@ -71,7 +72,5 @@
 
 /* RAISE */
 #define RAISELEVEL 0.35
-#endif
 
-/*Basic Information*/
-#define PNAME "Tiger need_notify\n"
+#endif

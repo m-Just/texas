@@ -26,8 +26,11 @@ struct ANAOPP{           // database structure, for the analysis of the opponent
 	double avrgBet, variance, foldrate, cc; // these values will be useful only after gathering enough info
 };
 
+void oppclear();
 
 int rnd(double val);
+
+int getLastStage(int i, int roundNum);
 
 /* Analysis */
 int hash(int id);

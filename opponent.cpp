@@ -16,6 +16,12 @@ int rnd(double val) {
 	return (int)(val + 0.5);
 }
 
+int getLastStage(int i, int roundNum) {
+	int k = RIVER - 1;
+	while (k > 0 && opp[i].bet[roundNum][k] == 0) k--;
+	return k;
+}
+
 /* Analysis */
 int hash(int id) {
 	int i;
@@ -124,10 +130,8 @@ void compute(int roundNum) {
 #ifdef TEST
 	FILE *fout = fopen("compute.txt", "a");
 #endif
-	for (int i = 0; i < 8; i++) if (opp[i].money > 0) {
-		int k = RIVER - 1;
-		while (k > 0 && opp[i].bet[roundNum][k] == 0) k--;
-		double lastbet = opp[i].bet[roundNum][k];
+	for (int i = 0; i < MAX_PLAYER_NUM; i++) if (opp[i].money > 0) {
+		double lastbet = opp[i].bet[roundNum][getLastStage(i, roundNum)];
 		opp[i].lastbet[roundNum] = (int)lastbet;
 		iterate(&opp[i].avrgBet, lastbet, roundNum);
 		iterate(&opp[i].variance, pow(lastbet - opp[i].avrgBet, 2.0), roundNum);
@@ -144,9 +148,8 @@ int patternAnalyse(int id) {
 
 double jettonPara(int id, int stage, int roundNum, int maxbetRnd) {
 	int endStage, i = hash(id);
-	for (endStage = 1; endStage < RIVER; endStage++) if (!opp[i].bet[maxbetRnd][endStage]) break;
 	double tmp = (double)(opp[i].bet[roundNum][stage-1]+opp[i].jetton[roundNum])/
-	       	     (double)(opp[i].bet[maxbetRnd][endStage-1]+opp[i].jetton[maxbetRnd]);
+	       	     (double)(opp[i].bet[maxbetRnd][getLastStage(i, roundNum)]+opp[i].jetton[maxbetRnd]);
 	return 1.0+(tmp-1.0)*opp[i].cc;
 }
 
