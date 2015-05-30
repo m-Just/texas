@@ -1,5 +1,5 @@
 #include "socket.h"
-#include"constant.h"
+#include "constant.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
-#include<stdlib.h>
+#include <stdlib.h>
 #include "conversion.h"
 
 int establishConnection(char* serverName, unsigned short serverPort, char* hostName, unsigned short hostPort) {
@@ -29,9 +29,12 @@ int establishConnection(char* serverName, unsigned short serverPort, char* hostN
 	sh.sin_port = htons(hostPort);
 	sh.sin_addr = host;
 
+	printf("Setting up socket...\n");
 	s = socket(AF_INET, SOCK_STREAM, 0);
 	setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-	bind(s, (struct sockaddr*) &sh, sizeof(struct sockaddr_in));
+	if (!bind(s, (struct sockaddr*) &sh, sizeof(struct sockaddr_in))) {
+		printf("Socket bind failure. Program abort\n"); exit(1);
+	}
 
 	int i;
 	while(1) {

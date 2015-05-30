@@ -6,8 +6,8 @@
 #include "conversion.h"
 #include "opponent.h"
 #include "Card.h"
-#include<algorithm>
-#include<string.h>
+#include <algorithm>
+#include <string.h>
 using namespace std;
 #include <time.h>
 
@@ -487,7 +487,6 @@ void pre_action(int x, int round)
 
 
 int main(int argc, char* agrv[]) {
-
 #ifdef WRITE_IN_FILE
 	FILE * fout = freopen("melog.txt", "w", stdout);
 #endif
