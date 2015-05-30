@@ -53,6 +53,7 @@ double pre_flop_rate[2][MAX_PLAYER_NUM + 1][52][52]; //win rate of pre_flop [0]t
 int stage_minus = 0; //stage_minus == 1 means that the information may be from the last stage. 
 int stage;
 double winrate, drawrate;
+int leastraise, mybet, curbet, lastbet;
 
 int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 {
@@ -79,8 +80,8 @@ int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 void Mate1Action(int round)
 {
 	double avrg = 0;
-	const double AVGC = 1.6;
-	double draw_line = 1.0 / plnum;
+	const double AVGC = 1.8;
+	double draw_line = 1.0 / not_fold_plnum;
 	int maxbet = 0;
 	for (int i = 0; i < 8; i++)
 	{
@@ -88,16 +89,21 @@ void Mate1Action(int round)
 		maxbet = max(maxbet, opp[i].bet[round][stage - 1]);
 	}
 	avrg /= 28000;
-	int mebet = (int)(avrg * pow(2.0 ,(winrate - draw_line * 1.5) / draw_line * 3));
-	if (round < 10) mebet = 0;
-#ifdef _TEST
-	printf("/*********round : %d ***********/", round);
-	printf("player: %d\n", plnum);
-	print_Card(hold + 1, 2, "hold");
-	print_Card(com + 1, com[0], "public card");
-	printf("average:%.0lf draw: %lf win: %lf maxbet: %7d mebet:%7d\n", avrg, R.first, R.second, maxbet, mebet);
+	int mebet = (int)(avrg * pow(10.0 ,winrate - draw_line * AVGC));
+	if (round < 10) mebet /= 5;
+	if (winrate < draw_line) mebet = 0;
+#ifdef TEST
+	if (mebet > 0)
+	{
+		printf("/*********round : %d ***********/", round);
+		printf("player: %d\n", plnum);
+		print_Card(hold + 1, 2, "hold");
+		print_Card(com + 1, com[0], "public card");
+		printf("average:%.0lf draw: %lf win: %lf maxbet: %7d mebet:%7d leastraise: %d\n", avrg, drawrate, winrate, maxbet, mebet, leastraise);
+	}
 #endif
-	if (maxbet > mebet) action(FOLD, 0, fd); else action(RAISE, (int)(mebet - maxbet), fd);
+	if (mebet > my.jetton) action(ALLIN, mebet, fd);
+	if (maxbet + leastraise> mebet) action(FOLD, 0, fd); else action(RAISE, (int)(mebet - maxbet), fd);
 }
 
 int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:common cards  7:showdown  8:pot-win  9:notify
@@ -269,7 +275,7 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 //read part-----------------------------------------------------------------------------
 
 //main logic part--------------------------------------------------------------
-int leastraise, mybet, curbet, lastbet;
+
 
 int get_uplim(double win_rate, int jet, int mybet)/*win_rate is winrate or relwinrate*/
 {

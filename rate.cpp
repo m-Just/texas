@@ -8,7 +8,7 @@
 #include<time.h>
 #include<stdlib.h>
 using namespace std;
-#define randomcount 35
+#define randomcount 30
 
 rate make_pair(double x1, double x2)
 {
