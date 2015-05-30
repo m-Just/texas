@@ -11,18 +11,39 @@
 using namespace std;
 #include <time.h>
 
-extern ANAOPP opp[];
-
-int fd;// socket id code
-double pre_flop_rate[2][MAX_PLAYER_NUM + 1][52][52];
-int stage_minus = 0; //stage_minus == 1 means that the information may be from the last stage. 
-int stage;
-
 struct player
 {
 	int pid, jetton, money;
 }button, sblind, bblind, nor[10], my;//nor[0].pid is the number of other players.
 //nor: other players.
+
+//read part-----------------------------------------------------------------------------
+int hold[5], com[10];
+
+struct player_in_game
+{
+	int pid, jetton, money, bet, action; //1:check  2:call  3:raise  4:all_in  5:fold  6:blind
+}done[10]; //done[0].pid is the number of players.
+
+struct player_rank
+{
+	int pid;
+	int hold[5];
+	int nut_hand;
+}rank[10];//rank[0].pid is player number. rank[0].nut_hand is the biggest nut_hand
+
+struct pot_win
+{
+	int pid, num;
+}win[10];//win[0].pid is player number.
+
+extern ANAOPP opp[];
+int plnum = 0; //player number
+int pot = 0;
+int fd;// socket id code
+double pre_flop_rate[2][MAX_PLAYER_NUM + 1][52][52]; //win rate of pre_flop [0]the draw the , [1]the win rate
+int stage_minus = 0; //stage_minus == 1 means that the information may be from the last stage. 
+int stage;
 
 int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 {
@@ -44,29 +65,6 @@ int ConnectAndReg(int argc, char* agrv[]) ///* connect to server and register*/
 	reg(id, fd, tmp);
 	return 1;
 }
-
-//read part-----------------------------------------------------------------------------
-int hold[5], com[10];
-
-struct player_in_game
-{
-	int pid, jetton, money, bet, action; //1:check  2:call  3:raise  4:all_in  5:fold  6:blind
-}done[10]; //done[0].pid is the number of players.
-
-struct player_rank
-{
-	int pid;
-	int hold[5];
-	int nut_hand;
-}rank[10];//rank[0].pid is player number.
-
-struct pot_win
-{
-	int pid, num;
-}win[10];//win[0].pid is player number.
-
-int plnum = 0; //player number
-int pot = 0;
 
 void Mate1Action(int round, int stage)
 {
@@ -194,7 +192,7 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 	}
 	if(strcmp(msg, "showdown/") == 0){
 		while(strcmp(msg, "/common") != 0)get_word(msg, fd);
-		rank[0].pid = 0;
+		rank[0].pid = 0; rank[0].nut_hand = 0;
 		while(1){
 			get_word(msg, fd);
 			if(strcmp(msg, "/showdown") == 0)return 7;
@@ -220,6 +218,7 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 				if(strcmp(msg, "FULL_HOUSE") == 0)rank[x].nut_hand = 7;
 				if(strcmp(msg, "FOUR_OF_A_KIND") == 0)rank[x].nut_hand = 8;
 				if(strcmp(msg, "STRAIGHT_FLUSH") == 0)rank[x].nut_hand = 9;
+				rank[0].nut_hand = max(rank[0].nut_hand, rank[x].nut_hand);
 			}
 		}
 	}

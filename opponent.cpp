@@ -87,7 +87,7 @@ int updateData(int id, int action, int num, int jet, int m, int stage, int round
 	else if (action == SHOW) {
 		opp[i].hand[roundNum] = num%10; // num := best_hand*10+nut_hand
 		/* bluff detection */
-		if (roundNum >= 20 && opp[i].foldrate)
+		if (roundNum >= bluff_detection_start_roundNum && opp[i].foldrate != 0)
 			if (opp[i].hand[roundNum]+2 <= num/10 && opp[i].bet[roundNum][RIVER-1] > opp[i].avrgBet/opp[i].foldrate)
 				opp[i].style = BLUFF;
 		for (j = 1; j <= STRAIGHT_FLUSH-opp[i].hand[roundNum]; j++)
