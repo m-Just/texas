@@ -38,7 +38,7 @@ struct pot_win
 }win[10];//win[0].pid is player number.
 
 extern ANAOPP opp[];
-int plnum = 0; //player number
+int plnum = 0, not_fold_plnum; //player number
 int pot = 0;
 int fd;// socket id code
 double pre_flop_rate[2][MAX_PLAYER_NUM + 1][52][52]; //win rate of pre_flop [0]the draw the , [1]the win rate
@@ -436,6 +436,8 @@ void pre_action(int x, int round)
 	if(x == INQUIRE_MSG || x == NOTIFY_MSG){
 		int i;
 		int f = 0;
+		done[0].bet = 0;
+		not_fold_plnum = 0;
 		for(i = 1; i <= done[0].pid; i++){
 			if(done[i].pid == my.pid){
 				my.jetton = done[i].jetton;
@@ -451,9 +453,10 @@ void pre_action(int x, int round)
 				int bet = done[i].bet;
 				updateData(done[i].pid, done[i].action, bet, done[i].jetton, done[i].money, stage, round);
 			}
+			if (done[i].action != FOLD) not_fold_plnum++;
 			if(done[i].action == RAISE && done[i].pid != my.pid){
-				if(leastraise < done[i].bet - done[i + 1].bet)
-					leastraise = done[i].bet - done[i + 1].bet;
+				leastraise = max(done[i].bet - done[0].bet, leastraise);
+				done[0].bet = max(done[0].bet, done[i].bet);
 			}
 			if(done[i].pid == sblind.pid)f = 1;
 		}
@@ -508,8 +511,9 @@ int main(int argc, char* agrv[]) {
 			}
 
 			//action
-			//if (x == INQUIRE_MSG) Mate1Action(round, stage);
-			
+
+			if (x == INQUIRE_MSG) Mate1Action(round, stage);
+			/*
 			if(x == INQUIRE_MSG){
 #ifdef WRITE_IN_FILE
 				fprintf(fout, "com[0] = %d  stage = %d\n\n", &com[0], &stage);
@@ -524,12 +528,12 @@ int main(int argc, char* agrv[]) {
 #ifdef WRITE_IN_FILE
 				fprintf(fout, "winrate = %d  mybet = %d  uplim = %d\n\n", &winrate, &mybet, &uplim);
 #endif
-					int raisebet = (rnd(winrate*plnum) - 1) * BIG_BLIND;
-					if (raisebet+mybet <= done[1].bet || raisebet > uplim) {
+					int raisebet = rnd((winrate * plnum - 1) * BIG_BLIND);
+					if (raisebet+mybet <= done[0].bet || raisebet > uplim) {
 						if(needcall == 0) action(CHECK, 0, fd);
 						else {
 							if(done[1].bet > uplim) action(FOLD, 0, fd);
-							else { action(CALL, 0, fd); mybet = done[1].bet; }
+							else { action(CALL, 0, fd); mybet = done[0].bet; }
 						}
 					}
 					else action(RAISE, (raisebet+mybet)/done[1].bet*done[1].bet-mybet, fd);  // raise before flop
@@ -575,7 +579,7 @@ int main(int argc, char* agrv[]) {
 						}
 					}
 				}
-			}
+			}*/
 		}
 	}
 
