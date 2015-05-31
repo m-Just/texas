@@ -554,14 +554,16 @@ int main(int argc, char* agrv[]){
 				fprintf(aaa, "winrate = %lf  mybet = %d  uplim = %d\n\n", winrate, mybet, uplim);
 #endif
 
-					int raisebet = rnd((winrate*plnum - 1) * BIG_BLIND);
+					int raisebet = rnd((winrate*not_fold_plnum - 1) * BIG_BLIND);
 					raisebet = max(raisebet, leastraise);
-					//
-					if (curbet > uplim) action(FOLD, 0, fd);
+					
+					if 	(curbet > uplim) action(FOLD, 0, fd);
 					else if (curbet + leastraise > uplim) action(CALL, 0, fd);
-					else if (uplim > curbet + raisebet) action(RAISE, raisebet, fd);
-					else if (uplim < curbet + raisebet) action(RAISE, uplim - curbet, fd);
-					else printf("stage 1 no action!\n");
+					else if (2*plnum < 3*not_fold_plnum) {  // 1/3 of players fold
+						if 	(uplim >= curbet + raisebet) action(RAISE, raisebet, fd);
+						else if (uplim <= curbet + raisebet) action(RAISE, uplim - curbet, fd);
+					}
+					else action(CHECK, 0, fd);
 					//last version of stage 1
 					/*
 					if (raisebet+mybet <= curbet || raisebet > uplim) {
