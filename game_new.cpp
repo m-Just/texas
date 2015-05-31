@@ -99,14 +99,16 @@ void Mate1Action(int round)
 	if (round < 10) mebet /= 5;
 	if (winrate < draw_line) mebet = 0;
 #ifdef TEST
+	FILE *fout = fopen("mate.txt", "a");
 	if (1)
 	{
-		printf("/*********round : %d ***********/", round);
-		printf("player: %d\n", plnum);
-		print_Card(hold + 1, 2, "hold");
-		print_Card(com + 1, com[0], "public card");
-		printf("average:%.0lf draw: %lf win: %lf maxbet: %7d mebet:%7d leastraise: %d\n", avrg, drawrate, winrate, maxbet, mebet, leastraise);
+		fprintf(fout, "/*********round : %d ***********/", round);
+		fprintf(fout, "player: %d\n", plnum);
+		print_Card(fout, hold + 1, 2, "hold");
+		print_Card(fout, com + 1, com[0], "public card");
+		fprintf(fout, "average:%.0lf draw: %lf win: %lf maxbet: %7d mebet:%7d leastraise: %d\n", avrg, drawrate, winrate, maxbet, mebet, leastraise);
 	}
+	fclose(fout);
 #endif
 	if (mebet > my.jetton) action(ALLIN, mebet, fd);
 	if (maxbet + leastraise> mebet) action(FOLD, 0, fd); else action(RAISE, (int)(mebet - maxbet), fd);
@@ -551,7 +553,9 @@ int main(int argc, char* agrv[]){
 					uplim = get_uplim(winrate, my.jetton, mybet);
 					
 #ifdef TEST
-				fprintf(aaa, "winrate = %lf  mybet = %d  uplim = %d\n\n", winrate, mybet, uplim);
+				fprintf(aaa, "round: %3d winrate = %.3lf  mybet = %6d  uplim = %6d\n\n", round, winrate, mybet, uplim);
+				print_Card(aaa, hold, 2, "hand_card");
+				print_Card(aaa, com, com[0], "com_card");
 #endif
 
 					int raisebet = rnd((winrate*plnum - 1) * BIG_BLIND);

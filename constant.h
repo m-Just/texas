@@ -67,6 +67,7 @@
 #define IOW get_word(msg, fd) //ignore one word from socket
 
 /* CONSTANT */
+#define TESTNUM 1e4
 #define REL_WINRATE_POS 0.1
 #define REL_WINRATE_MULT 0.2
 #define bluff_detection_start_roundNum 20

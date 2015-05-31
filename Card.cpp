@@ -149,8 +149,7 @@ int Card7::get_level(void){
 		if (level2 < 0)
 		{
 			printf("card7 level2 calculation error, level2 = %d\n", level2);
-
-			print_Card(card, 7 ,"err card");
+			//print_Card(card, 7 ,"err card");
 		}
 		return level;
 	}
@@ -170,16 +169,17 @@ void sort_card7(Card7 card_array[], int N)
 	sort(card_array, card_array + N);
 }
 
-void print_Card(Card card[], int num, char *card_type)
+void print_Card(FILE *fout, Card card[], int num, char *card_type)
 {
-	printf("/**%d of %s:\n", num, card_type);
-	for (int i = 0; i < num; i++) printf("%s", Card2str(card[i]));
-	printf("\n**\n");
+	fprintf(fout, "/**%d of %s:\n", num, card_type);
+	for (int i = 0; i < num; i++) fprintf(fout, "%s", Card2str(card[i]));
+	fprintf(fout, "\n**\n");
 }
 
-void print_Card(int card[], int num, char * card_type)
+void print_Card(FILE *fout, int card[], int num, char * card_type)
 {
 	Card c[10];
 	for (int i = 0; i < num; i++) c[i] = int2card(card[i]);
-	print_Card(c, num, card_type);
+	print_Card(fout, c, num, card_type);
 }
+

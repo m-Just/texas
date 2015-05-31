@@ -75,7 +75,7 @@ void pre_dfs(bool flag[][14], Card public_card[], const int &public_card_number)
 			if (public_card_number == 0)
 			{
 				char str[100];
-				sprintf(str, "preflop%d.txt", i+ 1);
+				sprintf(str, "preflop%d.txt", i + 1);
 				FILE *fout = fopen(str, "w");
 				fprintf(fout, "playernum i j winrate drawrate");
 				for (int i = 0; i < 52; i++)

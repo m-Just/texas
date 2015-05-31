@@ -1,5 +1,6 @@
 #ifndef zcx_1
 #define zcx_1
+#include<stdio.h>
 struct Card
 {
 	int color, val;
@@ -48,8 +49,8 @@ rate win_rate(const int hand_card[], int public_card[], const int &public_card_n
 rate win_rate_byrandom(const Card hand_card[], Card public_card[], const int &public_card_number, const int &player_number);
 rate make_pair(double x1, double x2);
 
-void print_Card(Card card[], int num, char * card_type);
-void print_Card(int card[], int num, char * card_type);
+void print_Card(FILE *fout, Card card[], int num, char * card_type);
+void print_Card(FILE *fout, int card[], int num, char * card_type);
 
 void read_pre_flop(double win[][52][52], double draw[][52][52]);
 #endif

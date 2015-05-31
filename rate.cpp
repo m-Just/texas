@@ -9,8 +9,6 @@
 #include<stdlib.h>
 using namespace std;
 #define randomcount 30
-#define TESTNUM 1e5
-
 rate make_pair(double x1, double x2)
 {
 	rate res;
