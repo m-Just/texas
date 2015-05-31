@@ -82,10 +82,16 @@ void Mate1Action(int round)
 	double avrg = 0;
 	const double AVGC = 1.8;
 	double draw_line = 1.0 / not_fold_plnum;
+	if (com[0] == 0)
+	{
+		rate R = win_rate(hold + 1, com + 1, com[0], plnum);
+		winrate = R.second;
+		drawrate = R.first;
+	}
 	int maxbet = 0;
 	for (int i = 0; i < 8; i++)
 	{
-		avrg +=min(opp[i].avrgBet, my.jetton) * (opp[i].jetton[round - 1] + opp[i].money[round - 1]);
+		avrg +=min(opp[i].avrgBet, (double)my.jetton) * (opp[i].jetton[round - 1] + opp[i].money[round - 1]);
 		maxbet = max(maxbet, opp[i].bet[round][stage - 1]);
 	}
 	avrg /= 28000;
@@ -93,7 +99,7 @@ void Mate1Action(int round)
 	if (round < 10) mebet /= 5;
 	if (winrate < draw_line) mebet = 0;
 #ifdef TEST
-	if (mebet > 0)
+	if (1)
 	{
 		printf("/*********round : %d ***********/", round);
 		printf("player: %d\n", plnum);
@@ -480,7 +486,6 @@ void pre_action(int x, int round)
 			if(done[i].pid == sblind.pid)f = 1;
 		}
 		if(leastraise < curbet - lastbet)leastraise = curbet - lastbet;
-		stage_minus = 0;
 	}
 	if(x == SHOW_MSG){
 		int i;
@@ -534,9 +539,9 @@ int main(int argc, char* agrv[]) {
 			}
 
 			//action
-			//if (x == INQUIRE_MSG) Mate1Action(round);
+			if (x == INQUIRE_MSG) Mate1Action(round);
 			
-			
+			/*
 			if(x == INQUIRE_MSG){
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
 				if(curbet > mybet)needcall = 1;
@@ -602,7 +607,7 @@ int main(int argc, char* agrv[]) {
 						}
 					}
 				}
-			} 
+			} */
 		}
 	}
 

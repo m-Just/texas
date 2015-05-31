@@ -146,7 +146,12 @@ int Card7::get_level(void){
 		printf("******************/\n");
 #endif
 		if (level < 1 || level > 9) printf("card7 level calculation error, level = %d\n", level);
-		if (level2 < 0) printf("card7 level2 calculation error, level2 = %d\n", level2);
+		if (level2 < 0)
+		{
+			printf("card7 level2 calculation error, level2 = %d\n", level2);
+
+			print_Card(card, 7 ,"err card");
+		}
 		return level;
 	}
 
