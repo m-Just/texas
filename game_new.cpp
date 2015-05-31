@@ -317,7 +317,7 @@ int get_uplim(double win_rate, int jet, int mybet)/*win_rate is winrate or relwi
 			}else if(pl[i].bet < BIG_BLIND)tmp += BIG_BLIND - pl[i].bet;
 		}
 	} 
-#ifdef TEST
+#ifdef _TEST
 				fprintf(aaa, "win_rate = %lf  tmp = %d\n\n", win_rate, tmp);
 #endif
 	double para = 1.0;
@@ -408,6 +408,7 @@ void pre_action(int x, int round)
 	stage_minus = 0;
 	if(x == BLIND_MSG)stage = PREFLOP, leastraise = BIG_BLIND;
 	if (x == HOLD_MSG) {
+		not_fold_plnum = plnum;
 		stage = PREFLOP, leastraise = BIG_BLIND;
 		rate R = win_rate(hold + 1, com + 1, com[0], not_fold_plnum);
 		winrate = R.second, drawrate = R.first;
@@ -554,8 +555,8 @@ int main(int argc, char* agrv[]){
 					
 #ifdef TEST
 				fprintf(aaa, "round: %3d winrate = %.3lf  mybet = %6d  uplim = %6d\n\n", round, winrate, mybet, uplim);
-				print_Card(aaa, hold, 2, "hand_card");
-				print_Card(aaa, com, com[0], "com_card");
+				print_Card(aaa, hold + 1, 2, "hand_card");
+				print_Card(aaa, com + 1, com[0], "com_card");
 #endif
 
 					int raisebet = rnd((winrate*not_fold_plnum - 1) * BIG_BLIND);
@@ -601,9 +602,7 @@ int main(int argc, char* agrv[]){
 					double ret = 1.0;
 					for(int i = 1; i <= 8 - plnum; i++)ret *= 0.9;
 					uplim = get_uplim(rel_winrate, my.jetton, mybet);
-#ifdef TEST
-				fprintf(aaa, "winrate = %lf  rel_winrate = %lf  mybet = %d  uplim = %d\n\n", winrate, rel_winrate, mybet, uplim);
-#endif
+
 				if (rel_winrate * ret > RAISELEVEL){
 					int raisebet = get_raise(round, curbet, uplim);
 					raisebet = max(raisebet, leastraise);
@@ -619,6 +618,11 @@ int main(int argc, char* agrv[]){
 					if (curbet > uplim) action(FOLD, 0, fd);
 					else action(CHECK, 0, fd);
 				}
+#ifdef TEST
+					fprintf(aaa, "\n\nround: %3d winrate = %.3lf  curbet = %6d  uplim = %6d least = %6d\n", round, winrate, curbet, uplim, leastraise);
+					print_Card(aaa, hold + 1, 2, "hand_card");
+					print_Card(aaa, com + 1, com[0], "com_card");
+#endif
 				//stage2 of the last version
 					/*if(rel_winrate * ret > RAISELEVEL){
 						int upraise = get_raise(round, curbet, uplim);
