@@ -285,12 +285,12 @@ int get_msg(int fd)//1:seat_info  2:game_over  3:blind  4:hold  5:inquire  6:com
 //main logic part--------------------------------------------------------------
 
 
-int get_uplim(double win_rate, int jet, int mybet)/*win_rate is winrate or relwinrate*/
+int get_uplim(double win_rate, int jet, int mybet, int round)/*win_rate is winrate or relwinrate*/
 {
 	int tmp = pot - mybet, f = 0;
 	int i;
 	struct getbet{
-		int pid, bet;
+		int pid, bet, jetton, action;
 	}pl[10];
 	memset(pl, 0, sizeof(pl));
 	pl[1].pid = button.pid;
@@ -308,43 +308,55 @@ int get_uplim(double win_rate, int jet, int mybet)/*win_rate is winrate or relwi
 				id = j; break;
 			}
 		pl[id].bet = done[i].bet;
+		pl[id].jetton = done[i].jetton;
+		pl[id].action = done[i].action;
 	}
 	for(i = 1; i <= pl[0].pid; i++){
 		int id = hash(pl[i].pid);
-		if(pl[i].pid != my.pid){
+		if(pl[i].jetton == 0)pl[i].jetton = opp[id].jetton[round - 1];
+		if(pl[i].jetton < BIG_BLIND)pl[i].jetton = START_JETTON;
+		if(pl[i].pid != my.pid && pl[i].action != FOLD){
 			if(opp[id].avrgBet){
-				if(pl[i].bet < opp[id].avrgBet)tmp += opp[id].avrgBet - pl[i].bet;
+				double ret = ((double)pl[i].jetton / (double)START_JETTON);
+				if(((double)pl[i].jetton / (double)START_JETTON) > 1.0)ret = 1.0;
+				if(pl[i].bet < opp[id].avrgBet * ret)tmp += (opp[id].avrgBet * ret + pl[i].bet) / 2.0 - pl[i].bet;
 			}else if(pl[i].bet < BIG_BLIND)tmp += BIG_BLIND - pl[i].bet;
 		}
 	} 
-#ifdef _TEST
-				fprintf(aaa, "win_rate = %lf  tmp = %d\n\n", win_rate, tmp);
+#ifdef TEST
+				fprintf(aaa, "tmp = %d\n", tmp);
 #endif
+	if(my.jetton < BIG_BLIND)my.jetton = START_JETTON;
 	double para = 1.0;
-	//if((double)jet/START_JETTON < 1.0)para = (double)jet/START_JETTON;
-	int ans = ((double)tmp * win_rate * para) / (1.0 - pow(win_rate, (9.0 - (double)plnum)/10.0) * para) + 0.5;
+	if((double)jet/START_JETTON < 1.0)para = (double)jet/START_JETTON;
+	double ans1 = ((double)tmp * pow(win_rate, 5.0 - (double)plnum / 2.0) * para) / (1.0 - min(0.99999999999999, 1.5 * win_rate * exp(win_rate - 0.35 - ((8 - not_fold_plnum) * 0.05))  * para));
+	int ans;
+	if(ans1 > 2147483646.0)ans = 2147483647;
+	else ans = ans1 + 0.5;
 	return ans;
 	//(tmp + n) * win_rate * jet/START_JETTON = n
 	//tmp*r*para = - n*r*para + n
 	//tmp*r*para / (1 - r*para) = n
 }
 
-
+///////////////////////////////////problem//////////////////////////////////////////////
 int get_handnut()
 {
 	Card7 get_handnut;
 	int size = -1;
 	for(int i = 1; i <= hold[0]; i++){
 		size++;
-		get_handnut.card[size].color = colorof(hold[i]);
-		get_handnut.card[size].val = pointof(hold[i]);
+		get_handnut.card[size].color = colorof(hold[i]) + 1;
+		get_handnut.card[size].val = pointof(hold[i]) - 1;
+		if(get_handnut.card[size].val == 0)get_handnut.card[size].val += 13;
 	}
 	for(int i = 1; i <= 5; i++){
 		size++;
 		int tmp = com[i];
 		if(i > com[0])tmp = 0;
-		get_handnut.card[size].color = colorof(tmp);
-		get_handnut.card[size].val = pointof(tmp);
+		get_handnut.card[size].color = colorof(tmp) + 1;
+		get_handnut.card[size].val = pointof(tmp) - 1;
+		if(get_handnut.card[size].val == 0)get_handnut.card[size].val += 13;
 	}
 	get_handnut.get_level();
 	return get_handnut.level;
@@ -366,6 +378,7 @@ int get_raise(int round, int nowbet, int mostbet)
 	getraise ret[10];
 	ret[0].pid = 0;
 	for(int i = 1; i <= done[0].pid; i++){
+		if(done[i].pid == my.pid)upfol = -1;
 		if (stage_minus && f){
 			if (stage > 2)upfol = estFold(done[i].pid, com + 1, stage + 1, stage - 1, round);
 			else upfol = 0;	
@@ -537,6 +550,9 @@ int main(int argc, char* agrv[]){
 			if (x == POT_MSG)
 			{
 				compute(round);
+				my.jetton -= mybet;
+				for(int i = 1; i <= win[0].pid; i++)
+					if(win[i].pid == my.pid)my.jetton += win[i].num;
 				break;
 			}
 
@@ -549,9 +565,11 @@ int main(int argc, char* agrv[]){
 				int i, act = 0, uplim, needcall = 0;//0: no need call  1: need call
 				if(curbet > mybet)needcall = 1;
 				else needcall = 0;
-				printf("stage: %d, not_fold_plnum:%d\n", stage, not_fold_plnum);
+
+	//			printf("stage: %d, not_fold_plnum:%d\n", stage, not_fold_plnum);
+				
 				if(stage == 1){//before flop
-					uplim = get_uplim(winrate, my.jetton, mybet);
+					uplim = get_uplim(winrate, my.jetton, mybet, round);
 					
 #ifdef TEST
 				fprintf(aaa, "round: %3d winrate = %.3lf  mybet = %6d  uplim = %6d\n\n", round, winrate, mybet, uplim);
@@ -559,16 +577,17 @@ int main(int argc, char* agrv[]){
 				print_Card(aaa, com + 1, com[0], "com_card");
 #endif
 
-					int raisebet = rnd((winrate*not_fold_plnum - 1) * BIG_BLIND);
+				/*	int raisebet = rnd((winrate*not_fold_plnum - 1) * BIG_BLIND);
 					raisebet = max(raisebet, leastraise);
 					
 					if 	(curbet > uplim) action(FOLD, 0, fd);
-					else if (curbet + leastraise > uplim) action(CALL, 0, fd);
+					else if (curbet + leastraise > uplim) action(CALL, 0, fd), mybet = curbet;
 					else if (2*plnum < 3*not_fold_plnum) {  // 1/3 of players fold
-						if 	(uplim >= curbet + raisebet) action(RAISE, raisebet, fd);
-						else if (uplim <= curbet + raisebet) action(RAISE, uplim - curbet, fd);
+						if 	(uplim >= curbet + raisebet) action(RAISE, raisebet, fd), mybet = curbet + raisebet;
+						else if (uplim <= curbet + raisebet) action(RAISE, uplim - curbet, fd), mybet = uplim;
 					}
-					else action(CHECK, 0, fd);
+					else action(CHECK, 0, fd), mybet = curbet;
+				*/
 					//last version of stage 1
 					/*
 					if (raisebet+mybet <= curbet || raisebet > uplim) {
@@ -582,6 +601,11 @@ int main(int argc, char* agrv[]){
 						action(RAISE, (raisebet+mybet)/curbet*curbet-mybet, fd);  // raise before flop
 						if(leastraise < (raisebet+mybet)/curbet*curbet-mybet)leastraise = (raisebet+mybet)/curbet*curbet-mybet;
 					}*/
+					if(needcall == 0) action(CHECK, 0, fd);
+					else {
+						if(curbet > uplim) action(FOLD, 0, fd);
+						else { action(CALL, 0, fd); mybet = curbet; }
+					}
 				}
 				if(stage >= 2){
 					int f = 0;
@@ -596,32 +620,36 @@ int main(int argc, char* agrv[]){
 						if(tmp != -1 && tmp != 0){
 							double pos = REL_WINRATE_POS;
 							if(hold_poker < tmp)pos = -REL_WINRATE_POS;
-							rel_winrate *= (1 + (REL_WINRATE_MULT * (hold_poker - tmp) - pos));
+							rel_winrate *= (1 + (REL_WINRATE_MULT * (hold_poker - tmp) - pos) * (1.0 - 1.0 / ((double)round / 3.0 + 1.0)));
 						}
 					}
 					double ret = 1.0;
 					for(int i = 1; i <= 8 - plnum; i++)ret *= 0.9;
-					uplim = get_uplim(rel_winrate, my.jetton, mybet);
+#ifdef TEST
+			fprintf(aaa, "retl_winrate = %lf\n", rel_winrate);
+#endif
+					uplim = get_uplim(rel_winrate, my.jetton, mybet, round);
 
 				if (rel_winrate * ret > RAISELEVEL){
 					int raisebet = get_raise(round, curbet, uplim);
 					raisebet = max(raisebet, leastraise);
 					if (curbet > uplim) action(FOLD, 0, fd);
-					else if (curbet + leastraise > uplim) action(CALL, 0, fd);
-					else if (uplim > curbet + raisebet) action(RAISE, raisebet, fd);
-					else if (uplim < curbet + raisebet) action(RAISE, uplim - curbet, fd);
-					else if (raisebet <= 0) action(CHECK, 0, fd); //including CALL by auto correction
+					else if (curbet + leastraise > uplim) action(CALL, 0, fd), mybet = curbet;
+					else if (uplim > curbet + raisebet) action(RAISE, raisebet, fd), mybet = curbet + raisebet;
+					else if (uplim <= curbet + raisebet) action(RAISE, uplim - curbet, fd), mybet = uplim;
+					else if (raisebet <= 0) action(CHECK, 0, fd), mybet = curbet; //including CALL by auto correction
 					else printf("stage 2 no action!\n");
 
 				}
 				else{
 					if (curbet > uplim) action(FOLD, 0, fd);
-					else action(CHECK, 0, fd);
+					else action(CHECK, 0, fd), mybet = curbet;
 				}
 #ifdef TEST
 					fprintf(aaa, "\n\nround: %3d winrate = %.3lf  curbet = %6d  uplim = %6d least = %6d\n", round, winrate, curbet, uplim, leastraise);
 					print_Card(aaa, hold + 1, 2, "hand_card");
 					print_Card(aaa, com + 1, com[0], "com_card");
+					fprintf(aaa, "\n\n--------------------------------------\n\n");
 #endif
 				//stage2 of the last version
 					/*if(rel_winrate * ret > RAISELEVEL){
