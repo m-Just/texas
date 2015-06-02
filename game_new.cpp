@@ -319,7 +319,7 @@ int get_uplim(double win_rate, int jet, int mybet, int round)/*win_rate is winra
 			if(opp[id].avrgBet){
 				double ret = ((double)pl[i].jetton / (double)START_JETTON);
 				if(((double)pl[i].jetton / (double)START_JETTON) > 1.0)ret = 1.0;
-				if(pl[i].bet < opp[id].avrgBet * ret)tmp += (opp[id].avrgBet * ret + pl[i].bet) / 2.0 - pl[i].bet;
+				if(pl[i].bet < opp[id].avrgBet * ret)tmp += opp[id].avrgBet - pl[i].bet;
 			}else if(pl[i].bet < BIG_BLIND)tmp += BIG_BLIND - pl[i].bet;
 		}
 	} 
@@ -329,10 +329,7 @@ int get_uplim(double win_rate, int jet, int mybet, int round)/*win_rate is winra
 	if(my.jetton < BIG_BLIND)my.jetton = START_JETTON;
 	double para = 1.0;
 	if((double)jet/START_JETTON < 1.0)para = (double)jet/START_JETTON;
-	double ans1 = ((double)tmp * pow(win_rate, 5.0 - (double)plnum / 2.0) * para) / (1.0 - min(0.99999999999999, 1.5 * win_rate * exp(win_rate - 0.35 - ((8 - not_fold_plnum) * 0.05))  * para));
-	int ans;
-	if(ans1 > 2147483646.0)ans = 2147483647;
-	else ans = ans1 + 0.5;
+	int ans = ((double)tmp * win_rate * para) / (1.0 - min(0.99999999999999, win_rate * exp(win_rate - 0.35 - ((8 - not_fold_plnum) * 0.05))  * para)) + 0.5;
 	return ans;
 	//(tmp + n) * win_rate * jet/START_JETTON = n
 	//tmp*r*para = - n*r*para + n
