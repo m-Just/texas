@@ -48,16 +48,15 @@ double coco(int* x, int* y, int ini_i, int steplen, int stepsize, int totallen) 
 	cnt = 0;
 	for (i = ini_i; i <= ini_i+(len-1)*stepsize; i+=stepsize) {
 		xa[cnt] = 0; ya[cnt] = 0;
-		for (j = i; j < i+steplen; j++) if (x[j]) { xa[cnt] += x[j]; ya[cnt] += y[j]; }
-		cnt++;
+		for (j = i; j < i+steplen; j++) if (x[j]) { xa[cnt] += x[j]; ya[cnt] += y[j]; cnt++; }
 	}
-	for (i = 0; i < len; i++) { xaa += xa[i]; yaa += ya[i]; }
-	xaa /= len; yaa /= len;
+	for (i = 0; i < cnt; i++) { xaa += xa[i]; yaa += ya[i]; }
+	xaa /= cnt; yaa /= cnt;
 
 	if (yistmp) free(y);
 
 	double upper = 0, xd = 0, yd = 0;
-	for (i = 0; i < len; i++) {
+	for (i = 0; i < cnt; i++) {
 		upper += (xa[i]-xaa)*(ya[i]-yaa);
 		xd    += pow(xa[i]-xaa, 2.0);
 		yd    += pow(ya[i]-yaa, 2.0);
