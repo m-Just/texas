@@ -1,11 +1,48 @@
-#include<cstdlib>
+#include<stdlib.h>
 #include<algorithm> 
 #include"Card.h"
+#include<string.h>
+#include<stdio.h>
+#include"constant.h"
 using namespace std;
 
-int Card7::get_level(void)
-	{
-		sort(card, card + 7);
+Card int2card(int card_in_int)
+{
+	Card res;
+	res.val = card_in_int / 4;
+	if (res.val == 0) res.val += 13;
+	res.color = card_in_int % 4 + 1;
+	return res;
+}
+
+int Card2int(Card card)
+{
+	return (card.val % 13 * 4 + card.color - 1);
+}
+
+char* Card2str(const Card &card)
+{
+	static char str[30];
+	str[0] = '(';
+	switch (card.color) {
+	case 1: str[1] = 'H'; break;
+	case 2: str[1] = 'D'; break;
+	case 3: str[1] = 'S'; break;
+	case 4: str[1] = 'C'; break;
+	}
+	sprintf(str + 2, ",%d) \0", card.val);
+	//sprintf(str + 2, "00\0");
+	return str;
+}
+
+int Card7::get_level(void){
+#ifdef _TEST
+		printf("/******************\n");
+		printf("calculating the level of Card7:\n");
+		for (int i = 0; i < 7; i++) printf("(%d, %d) ", card[i].color, card[i].val);
+		printf("\n");
+#endif
+		sort(card, card + 6);
 		level = 1; // High card
 		level2 = 0;
 		for (int i = 0;i < 7; i++) level2 = level2 * 13 + card[i].val; 
@@ -104,6 +141,16 @@ int Card7::get_level(void)
 			}
 		}
 		
+#ifdef _TEST
+		printf("level:%d %d", level, level2);
+		printf("******************/\n");
+#endif
+		if (level < 1 || level > 9) printf("card7 level calculation error, level = %d\n", level);
+		if (level2 < 0)
+		{
+			printf("card7 level2 calculation error, level2 = %d\n", level2);
+			//print_Card(card, 7 ,"err card");
+		}
 		return level;
 	}
 
@@ -121,3 +168,18 @@ void sort_card7(Card7 card_array[], int N)
 {
 	sort(card_array, card_array + N);
 }
+
+void print_Card(FILE *fout, Card card[], int num, char *card_type)
+{
+	fprintf(fout, "/**%d of %s:\n", num, card_type);
+	for (int i = 0; i < num; i++) fprintf(fout, "%s", Card2str(card[i]));
+	fprintf(fout, "\n**\n");
+}
+
+void print_Card(FILE *fout, int card[], int num, char * card_type)
+{
+	Card c[10];
+	for (int i = 0; i < num; i++) c[i] = int2card(card[i]);
+	print_Card(fout, c, num, card_type);
+}
+

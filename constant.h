@@ -10,9 +10,9 @@
 #define ALLIN 4
 #define FOLD  5
 #define BLIND 6  // both big and small blind bet.
-#define SHOW  7  // showdown, including both winning and losing occasions.
-#define POT   8  // the action of winning jetton from the pot.
-#define QUIT  9  // gameover, when a player loses all his money.
+#define SHOW  7  // showdown and pot distribution, including both winning and losing occasions.
+#define POT SHOW
+#define QUIT  8  // gameover, when a player loses all his money.
 
 /* Poker Hands */
 #define UNKNOWN   0
@@ -41,15 +41,38 @@
 #define PREFLOP 1 // including blind
 #define FLOP    2
 #define TURN    3
-#define RIVER   4
-#define POT_WIN 5
+#define RIVER   4 // including pot_win
+#define POT_WIN RIVER
 
 /* Basic Information */  // updated 5.25
-#define MAX_PLAYER_NUM 8
+#define MAX_PLAYER_NUM 8  // including ourself
 #define MAX_ROUND 600
 #define START_MONEY  4000
 #define START_JETTON 2000
 #define BIG_BLIND   40
 #define SMALL_BLIND 20
+#define PNAME "Tiger need_notify\n"
+
+/* Macro for test */
+#define TEST
+#define TESTNEW
+#ifdef TEST
+//#define WRITE_IN_FILE
+#endif
+#define max(a, b) ((a) < (b))?(b):(a)
+#define min(a, b) ((a) > (b))?(b):(a)
+
+/* Abbr */
+#define SGI socket_get_int(fd)
+#define IOW get_word(msg, fd) //ignore one word from socket
+
+/* CONSTANT */
+#define TESTNUM 1e4
+#define REL_WINRATE_POS 0.1
+#define REL_WINRATE_MULT 0.2
+#define bluff_detection_start_roundNum 20
+
+/* RAISE */
+#define RAISELEVEL 0.35
 
 #endif
